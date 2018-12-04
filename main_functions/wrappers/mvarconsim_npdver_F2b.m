@@ -70,7 +70,7 @@ end
 a =1;
 figure(1)
 % scatter(NCvec,npPow,40,cmapn(1,:),'filled')
-scatter(NCvec,nscoh,40,cmapn(1,:),'filled')
+scatter(SNRDB./SNRBASE,nscoh,50,cmapn(1,:),'Marker','+','LineWidth',3);
 hold on
 scatter(NCvec,npd,40,cmapn(3,:),'filled')
 scatter(NCvec,npGC,40,cmapn(2,:),'filled')

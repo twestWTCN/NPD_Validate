@@ -28,5 +28,5 @@ subplot(N,N,1); ylim([0 0.2])
 subplot(N,N,5); ylim([0 0.2])
 subplot(N,N,9); ylim([0 0.2])
 legend({'Power','Coherence','NPD','NPDx2','Granger'})
-set(gcf,'Position',[1077         347         867         734])
+set(gcf,'Position',[1077         347         800         700])
 

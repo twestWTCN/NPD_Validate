@@ -1,5 +1,5 @@
 close all; clear all
-%% Simulation 2
+%% Simulation 5A and B (SNR and Asym SNR Sweep)
 % Effects of Signal Mixing
 fname = 'Figure4';
 N = 3; % # of nodes

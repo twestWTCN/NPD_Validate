@@ -73,7 +73,7 @@ figure(2)
 % scatter(NCvec,npPow,40,cmapn(1,:),'filled')
 SNRDB = 10*log10(snrbank(:,1));
 SNRBASE = 10*log10(snrbank(:,2));
-scatter(SNRDB./SNRBASE,nscoh,40,cmapn(1,:),'filled')
+scatter(SNRDB./SNRBASE,nscoh,50,cmapn(1,:),'Marker','+','LineWidth',3);
 hold on
 scatter(SNRDB./SNRBASE,npd,40,cmapn(3,:),'filled')
 scatter(SNRDB./SNRBASE,npGC,40,cmapn(2,:),'filled')

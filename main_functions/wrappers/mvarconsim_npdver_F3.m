@@ -36,11 +36,11 @@ for ncov = 1:NC
         data.trial{1}(i,:) = y;
     end
     %% Plot Example Trace
-    figure(1)
-    plot(data.time{1},data.trial{1}+[0 2.5 5]');
-    xlim([100 105])
-    xlabel('Time'); ylabel('Amplitude'); grid on
-    legend({'X1','X2','X3'})
+%     figure(1)
+%     plot(data.time{1},data.trial{1}+[0 2.5 5]');
+%     xlim([100 105])
+%     xlabel('Time'); ylabel('Amplitude'); grid on
+%     legend({'X1','X2','X3'})
     
     %% Power
     figure(2)

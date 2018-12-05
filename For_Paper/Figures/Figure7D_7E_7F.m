@@ -1,6 +1,6 @@
 close all; clear all
 addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\TWtools')
-%% Simulation 6- Incomplete Signals for Conditioning
+%% Simulation 7- Incomplete Signals for Conditioning
 % Route X->Z->Y
 fname = 'Figure6';
 N = 3; % # of nodes

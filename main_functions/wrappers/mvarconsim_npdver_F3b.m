@@ -67,7 +67,7 @@ SNRDB = 10*log10(snrbank(:,1));
 
 A = SNRDB;
 % scatter(NCvec,npPow,40,cmapn(1,:),'filled')
-scatter(SNRDB./SNRBASE,nscoh,50,cmapn(1,:),'Marker','+','LineWidth',3);
+scatter(A,nscoh,50,cmapn(1,:),'Marker','+','LineWidth',3);
 hold on
 % [param,stat]=sigm_fit(A,nscoh)
 % hold on

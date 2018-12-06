@@ -81,7 +81,11 @@ for ncov = 1:NC
     a =1;
 end
 
+SNRDB = 10*log10(snrbank(:,1));
+SNRBASE = 10*log10(snrbank(:,2));
+SRAT = SNRDB./SNRBASE
 
+a= 1;
 % cfg = [];
 % cfg.viewmode = 'butterfly';  % you can also specify 'butterfly'
 % ft_databrowser(cfg, data);

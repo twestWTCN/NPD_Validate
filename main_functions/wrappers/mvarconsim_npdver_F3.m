@@ -30,9 +30,12 @@ for ncov = 1:NC
     %% Compute Signal Mixing
     randproc = randn(size(data.trial{1}));
     for i = 1:size(randproc,1)
-        y = data.trial{1}(i,:);
-        y = y+((NCvec(ncov)*std(y)).*randproc(i,:));
-        y = (y-mean(y))./std(y);
+        s = data.trial{1}(i,:);
+        s = (s-mean(s))./std(s);
+        n = ((NCvec(ncov)*1).*randproc(i,:));
+        y = s + n;
+        snr = var(s)/var(n);
+        snrbank(ncov,i) = snr;
         data.trial{1}(i,:) = y;
     end
     %% Plot Example Trace
@@ -75,6 +78,8 @@ for ncov = 1:NC
     %     plotNPDXCorr(lags,npdcrcv,data,[0 0 0],plotfig,linestyle)
     a =1;
 end
+SNRDB = 10*log10(snrbank(:,1))
+a= 1;
 
 
 % cfg = [];

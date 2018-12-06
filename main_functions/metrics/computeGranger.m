@@ -1,4 +1,4 @@
-function [Hz granger] = computeGranger(freq,cmap,Nsig,plotfig,linestyle)
+function [Hz granger grangerft] = computeGranger(freq,cmap,Nsig,plotfig,linestyle)
 cfg           = [];
 cfg.method    = 'granger';
 grangerft       = ft_connectivityanalysis(cfg, freq);
@@ -34,6 +34,6 @@ end
 
 % Put in same format as the NPD
 granger{1,1} = igrangerft.instantspctrm;
-granger{1,2} = grangerft.grangerspctrm;
-granger{1,3} = grangerft.grangerspctrm(2:-1:1,2:-1:1,:);
+granger{1,2} = grangerft.grangerspctrm(2:-1:1,2:-1:1,:);
+granger{1,3} = grangerft.grangerspctrm;
 Hz = grangerft.freq;

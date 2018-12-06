@@ -3,7 +3,7 @@ if nargin<6
     smord = 2;
 end
 cfg = [];
-cfg.length  =1;
+cfg.length  = 1;
 data = ft_redefinetrial(cfg,data);
 %% Compute Spectra
 cfg           = [];
@@ -11,6 +11,9 @@ cfg.method    = 'mtmfft';
 cfg.taper     = 'dpss';
 cfg.output    = 'fourier';
 cfg.tapsmofrq = smord;
+cfg.keeptrials = 'yes';
+cfg.padtype = 'zero';
+cfg.pad = 2;
 freq          = ft_freqanalysis(cfg, data);
 if plotfig
     

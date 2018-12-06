@@ -2,7 +2,6 @@ function [] = mvarconsim_npdver_F3b_asysm(C,NCV,NC)
 
 % NCvec = linspace(0,2,NC);
 NCvec = logspace(log10(0.01),log10(10),NC);
-
 NCvec(2:3,:) = repmat(0.01,2,NC);
 nc_col_sc = [1 0.9 0.8];
 for i = 1:NC

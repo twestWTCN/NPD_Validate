@@ -33,9 +33,8 @@ for ncov = 1:NC
     %% Compute Signal Mixing
     sigmix = repmat(NCvec(ncov)/(Nsig-1),Nsig,Nsig).*~eye(Nsig);
     sigmix = sigmix+eye(Nsig).*(1-NCvec(ncov));
-    
     data.trial{1} = sigmix*data.trial{1};
-    
+    data.trial{1} = (data.trial{1} -mean(data.trial{1},2))./std(data.trial{1},[],2);
     
     %     if ncov == NC
     %         plotfig =1;

@@ -1,7 +1,6 @@
-function [] = mvarconsim_npdver_F8(data,NC)
+function [] = mvarconsim_npdver_F8A(data,NC)
 
-% NCvec = linspace(0,1,NC);
-NCvec = [0 0.05 0.1];
+NCvec = [0 1 2];
 nc_col_sc = [1 0.9 0.8];
 Nsig = 2;
 for i = 1:NC
@@ -15,24 +14,31 @@ for ncov = 1:NC
     linestyle = lsstyles{ncov};
     
     %% Compute Signal Mixing
-    sigmix = repmat(NCvec(ncov)/(Nsig-1),Nsig,Nsig).*~eye(Nsig);
-    sigmix = sigmix+eye(Nsig).*(1-NCvec(ncov));
-    data.trial{1} = sigmix*data.trial{1};
-    data.trial{1} = (data.trial{1} -mean(data.trial{1},2))./std(data.trial{1},[],2);
+    randproc = randn(size(data.trial{1}));
+    for i = 1:size(randproc,1)
+        s = data.trial{1}(i,:);
+        s = (s-mean(s))./std(s);
+        n = ((NCvec(ncov)*1).*randproc(i,:));
+        y = s + n;
+        snr = var(s)/var(n);
+        snrbank(ncov,i) = snr;
+        data.trial{1}(i,:) = y;
+    end
+    
     %     if ncov == NC
     %         plotfig =1;
     %     else
     plotfig =1;
     %     end
     %% Plot Example Trace
-    figure(1)
-    plot(data.time{1},data.trial{1}+[0 2.5]');
-    xlim([100 105])
-    xlabel('Time'); ylabel('Amplitude'); grid on
-    legend({'X1','X2','X3'})
+%     figure(1)
+%     plot(data.time{1},data.trial{1}+[0 2.5]');
+%     xlim([100 105])
+%     xlabel('Time'); ylabel('Amplitude'); grid on
+%     legend({'X1','X2','X3'})
     
     %% Power
-    figure(2)
+    figure(1)
     freq = computeSpectra(data,[0 0 0],Nsig,0,linestyle,3);
     
     %% Coherence
@@ -44,7 +50,7 @@ for ncov = 1:NC
     
     %% NPD
     figure(2)
-    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1,6);
+    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1,6,1);
     coh.freq= Hz; coh.cohspctrm = nscohspctrm;
     % NS Coh
     computeNSCoherence(coh,cmapn(1,:),Nsig,0,linestyle)

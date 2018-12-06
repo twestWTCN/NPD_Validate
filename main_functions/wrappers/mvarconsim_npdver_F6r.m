@@ -1,6 +1,6 @@
 function [] = mvarconsim_npdver_F6r(C,NCV,NC)
 
-NCvec = linspace(0,5,NC);
+NCvec = logspace(log10(0.01),log10(10),NC);
 % NCvec = [0 0.5 1.5];
 nc_col_sc = [1 0.9 0.8];
 
@@ -28,10 +28,13 @@ rng(124321)
     X = data;
     randproc = randn(size(data.trial{1}));
     for i = 2
-        y = data.trial{1}(i,:);
-        y = y+((NCvec(ncov)*std(y)).*randproc(i,:));
-        y = (y-mean(y))./std(y);
-        X.trial{1}(i,:) = y;
+        s = data.trial{1}(i,:);
+        s = (s-mean(s))./std(s);
+        n = ((NCvec(ncov)*1).*randproc(i,:));
+        y = s + n;
+        snr = var(s)/var(n);
+        snrbank(ncov,i) = snr;
+        data.trial{1}(i,:) = y;
     end
 
 
@@ -60,8 +63,8 @@ rng(124321)
 %     plotNPD(Hz,npdspctrmW,data,cmapn(4,:),1,linestyle)
 % 
     %% GRANGER
-    granger = computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle);
-    npGC(ncov) = max(granger.grangerspctrm(1,3,granger.freq>16 & granger.freq<22)); %-max(granger.grangerspctrm(1,2,granger.freq>42 & granger.freq<62));
+    [dum1 dum2 grangerft] = computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle);
+    npGC(ncov) = max(grangerft.grangerspctrm(1,3,grangerft.freq>16 & grangerft.freq<22)); %-max(granger.grangerspctrm(1,2,granger.freq>42 & granger.freq<62));
     
 %     %% NPD CORR
 %         figure(3)
@@ -70,12 +73,16 @@ rng(124321)
     a =1;
 end
 
+
+SNRDB = 10*log10(snrbank(:,2));
+A = SNRDB;
+
 % scatter(NCvec,npPow,40,cmapn(1,:),'filled')
 % scatter(NCvec(1,:),nscoh,40,cmapn(1,:),'filled')
 hold on
-scatter(NCvec(1,:),npd,40,cmapn(3,:),'filled')
-scatter(NCvec(1,:),npGC,40,cmapn(2,:),'filled')
-scatter(NCvec(1,:),npdz,40,cmapn(4,:),'filled')
+scatter(A,npd,40,cmapn(3,:),'Marker','+','LineWidth',3)
+scatter(A,npGC,40,cmapn(2,:),'filled')
+scatter(A,npdz,40,cmapn(4,:),'filled')
 grid on
 xlabel('X2 SNR');ylabel('FC X_1 \rightarrow X_3')
 legend({'NPD','Granger','NPDx2'},'Location','SouthEast')

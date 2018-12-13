@@ -13,7 +13,7 @@ NCV     = eye(N).*0.3;
 % 5A - FC vs SNR
 % % mvarconsim_npdver_F2b(C,NCV,25)
 figure(1)
-mvarconsim_npdver_F3b(C,NCV,25)
+% mvarconsim_npdver_F3b(C,NCV,25)
 % 
 
 % 5A - FC vs SNR Asymmetry

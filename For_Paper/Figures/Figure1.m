@@ -1,10 +1,8 @@
 % addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\linspecer')
 % addpath('C:\spm12'); spm eeg; close all
 % addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\Neurospec\neurospec21')
-% addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\Neurospec\neurospec21')
-addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\TWtools')
-% mvarconsim_npdver(C,NCV,fstord,sndord,fname)
-close all
+% addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\Neurospec\PartialDirected')
+% addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\TWtools')
 
 %% Simulation 1
 fname = 'Figure1';
@@ -15,9 +13,7 @@ C(:,:,2) = -C(:,:,2);
 C(2,1,2) = 0.5;
 C(3,1,3) = 0.5;
 NCV     = eye(N).*0.3;
-fstord = 2;
-sndord = [2 3];
-mvarconsim_npdver_F1(C,NCV,1,fstord,sndord,fname)
+mvarconsim_npdver_F1(C,NCV,1)
 
 figure(1)
 set(gca, 'Color', 'None'); box off

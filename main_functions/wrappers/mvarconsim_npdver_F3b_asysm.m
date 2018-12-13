@@ -62,8 +62,8 @@ for ncov = 1:NC
 %     plotNPD(Hz,npdspctrm,data,cmapn(3,:),plotfig,linestyle)
 
     %% GRANGER
-    granger = computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle);
-    npGC(ncov) = max(granger.grangerspctrm(2,1,granger.freq>42 & granger.freq<62))-max(granger.grangerspctrm(1,2,granger.freq>42 & granger.freq<62));
+    [Hz granger grangerft] = computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle);
+    npGC(ncov) = max(grangerft.grangerspctrm(2,1,grangerft.freq>42 & grangerft.freq<62))-max(grangerft.grangerspctrm(1,2,grangerft.freq>42 & grangerft.freq<62));
 end
 
 a =1;
@@ -72,10 +72,15 @@ figure(2)
 % scatter(NCvec,npPow,40,cmapn(1,:),'filled')
 SNRDB = 10*log10(snrbank(:,1));
 SNRBASE = 10*log10(snrbank(:,2));
-scatter(SNRDB./SNRBASE,nscoh,50,cmapn(1,:),'Marker','+','LineWidth',3);
+A = SNRDB./SNRBASE;
+scatter(A,nscoh,50,cmapn(1,:),'Marker','+','LineWidth',3);
+% [param,stat]=sigm_fit(A,nscoh)
 hold on
-scatter(SNRDB./SNRBASE,npd,40,cmapn(3,:),'filled')
-scatter(SNRDB./SNRBASE,npGC,40,cmapn(2,:),'filled')
+scatter(A,npd,40,cmapn(3,:),'filled')
+% [param,stat]=sigm_fit(A,npd)
+scatter(A,npGC,40,cmapn(2,:),'filled')
+% [param,stat]=sigm_fit(A,npGC)
+
 grid on
 xlabel('SAsym');ylabel('FC Difference')
 legend({'Coherence','NPD','Granger'})

@@ -1,4 +1,4 @@
-function [] = mvarconsim_npdver_F1(C,NCV,NC,frstord,sndord,fname)
+function [] = mvarconsim_npdver_F1(C,NCV,NC)
 
 % NCvec = linspace(0,1,NC);
 NCvec = [0 0.5 0.8];

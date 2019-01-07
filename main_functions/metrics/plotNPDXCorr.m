@@ -21,24 +21,24 @@ function plotNPDXCorr(lags,npdcrcvZ,data,cmap,plotfig,linestyle)
              if i == 3 && j ==2
                 xlabel({'lag (s)';['signal ' num2str(j)]; 'to:'})
             end
-            if plotfig
-                plot(fx,repmat(c13.rho_c95,1,size(fy,1)),'k--')
-                hold on
-                plot(fx,repmat(-c13.rho_c95,1,size(fy,1)),'k--')
-            end
+%             if plotfig
+%                 plot(fx,repmat(c13.rho_c95,1,size(fy,1)),'k--')
+%                 hold on
+%                 plot(fx,repmat(-c13.rho_c95,1,size(fy,1)),'k--')
+%             end
             ylim([-0.5 1]);
             xlim([-500 500]); grid on
             clear fy
         end
     end
     if plotfig
-        set(gcf,'Position',[636 172 1264 889])
-        h = legend(NCtits);
-        set(h,'Position',[0.895 0.845 0.0837 0.0804],'FontSize',8)
-        annotation(gcf,'textbox',...
-            [0.351 0.941 0.321 0.043],...
-            'String',{'NonParametric Directionality RhoYX Partialed on ' num2str(frstord) ': XCOR'},...
-            'HorizontalAlignment','center',...
-            'FitBoxToText','off',...
-            'EdgeColor','none');
+%         set(gcf,'Position',[636 172 1264 889])
+% %         h = legend(NCtits);
+%         set(gcf,'Position',[0.895 0.845 0.0837 0.0804],'FontSize',8)
+%         annotation(gcf,'textbox',...
+%             [0.351 0.941 0.321 0.043],...
+%             'String',{'NonParametric Directionality RhoYX Partialed on ' num2str(frstord) ': XCOR'},...
+%             'HorizontalAlignment','center',...
+%             'FitBoxToText','off',...
+%             'EdgeColor','none');
     end

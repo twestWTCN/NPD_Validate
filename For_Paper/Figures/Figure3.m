@@ -1,5 +1,5 @@
-clear all; close all
-% Figure 3- ASymetric SNR
+clear; close all
+% Figure 3 - Asymmetric SNR
 N = 3; % # of nodes
 MO = 3;% model order
 
@@ -9,7 +9,7 @@ C(2,1,2) = 0.35;
 C(1,2,2) = 0.35;
 NCV     = eye(N).*0.3;
 
-mvarconsim_npdver_F3_asysm(C,NCV,3)
+wrapper_Fig3_AsymSNR(C,NCV,3)
 
 
 figure(2)

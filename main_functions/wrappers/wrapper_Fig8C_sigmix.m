@@ -1,4 +1,4 @@
-function [] = mvarconsim_npdver_F8C_1(data,NC)
+function [] = wrapper_Fig8C_sigmix(data,NC)
 
 % NCvec = linspace(0,1,NC);
 NCvec = [0 0.05 0.1];
@@ -11,6 +11,11 @@ end
 cmap = linspecer(4);
 lsstyles = {'-','-.',':'};
 for ncov = 1:NC
+        if ncov == 1
+        bstrp = 1;
+    else
+        bstrp = 0;
+    end
     cmapn = cmap.*nc_col_sc(ncov);
     linestyle = lsstyles{ncov};
     
@@ -44,20 +49,20 @@ for ncov = 1:NC
     
     %% NPD
     figure(2)
-    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1,6,1);
-    coh.freq= Hz; coh.cohspctrm = nscohspctrm;
+    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1,6,bstrp);
+    coh.freq= Hz; coh.cohspctrm = nscohspctrm{1}; coh.ci = nscohspctrm{2};
     % NS Coh
-    computeNSCoherence(coh,cmapn(1,:),Nsig,0,linestyle)
+    computeNSCoherence(coh,cmapn(1,:),Nsig,0,linestyle,bstrp)
     %     plotNPD_zero(Hz,npdspctrm,data,cmap(1,:),plotfig,linestyle)
     % NPD
-    plotNPD(Hz,npdspctrm,data,cmapn(3,:),0,linestyle)
+    plotNPD(Hz,npdspctrm,data,cmapn(3,:),0,linestyle,bstrp)
     % NPDx1
     %     plotNPD(Hz,npdspctrmZ,data,cmapn(4,:),plotfig,linestyle)
     %     plotNPD(Hz,npdspctrmW,data,cmap(4,:),plotfig,linestyle)
     
     %% GRANGER
     figure(2)
-    [gHz granger] = computeGranger(freq,cmapn(2,:),Nsig,0,linestyle);
+    [gHz granger] = computeGranger(freq,cmapn(2,:),Nsig,0,linestyle,0,bstrp);
     
     plotSTN_M2_data(Hz,npdspctrm,data,cmapn(3,:),1,linestyle)
     plotSTN_M2_data(gHz,granger,data,cmapn(2,:),1,linestyle)

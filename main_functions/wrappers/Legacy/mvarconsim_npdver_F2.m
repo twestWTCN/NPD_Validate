@@ -1,4 +1,4 @@
-function [] = mvarconsim_npdver_F2b(C,NCV,NC,frstord,sndord,fname)
+function [] = wrapper_(C,NCV,NC,frstord,sndord,fname)
 
 NCvec = linspace(0,1,NC);
 % NCvec = [0 0.25 0.5];

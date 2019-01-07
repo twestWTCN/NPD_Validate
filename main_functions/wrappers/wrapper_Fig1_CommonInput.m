@@ -1,4 +1,4 @@
-function [] = mvarconsim_npdver_F1(C,NCV,NC,frstord,sndord,fname)
+function [] = wrapper_Fig1_CommonInput(C,NCV,NC,frstord,sndord,fname)
 
 % NCvec = linspace(0,1,NC);
 NCvec = [0 0.5 0.8];
@@ -9,19 +9,26 @@ end
 
 cmap = linspecer(4);
 lsstyles = {'-','-.',':'};
+
+Nsig = size(C,1);
+cfg             = [];
+cfg.ntrials     = 1;
+cfg.triallength = 250;
+cfg.fsample     = 200;
+cfg.nsignal     = Nsig;
+cfg.method      = 'ar';
+cfg.params = C;
+cfg.noisecov = NCV;
+data              = ft_connectivitysimulation(cfg);
+
 for ncov = 1:NC
+    if ncov == 1
+        bstrp = 1;
+    else
+        bstrp = 0;
+    end
     cmapn = cmap.*nc_col_sc(ncov)
     ncv = NCvec(ncov);
-    Nsig = size(C,1);
-    cfg             = [];
-    cfg.ntrials     = 1;
-    cfg.triallength = 500;
-    cfg.fsample     = 100;
-    cfg.nsignal     = Nsig;
-    cfg.method      = 'ar';
-    cfg.params = C;
-    cfg.noisecov = NCV;
-    data              = ft_connectivitysimulation(cfg);
     
     linestyle = lsstyles{ncov};
     % Weighted mixture of signals
@@ -55,33 +62,32 @@ for ncov = 1:NC
     freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle);
     
     %% Coherence
-%         figure(2)
-%    computeCoherence(freq,cmap(1,:),Nsig,plotfig,linestyle)
+    %         figure(2)
+    %    computeCoherence(freq,cmap(1,:),Nsig,plotfig,linestyle)
     
     %     %% WPLI
     %     computeWPLI(freq,cmap,Nsig,linestyle)
     
     %% NPD
     figure(2)
-    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1);
-    coh.freq= Hz; coh.cohspctrm = nscohspctrm;
+    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1,8,1,bstrp);
+    coh.freq= Hz; coh.cohspctrm = nscohspctrm{1}; coh.ci = nscohspctrm{2};
     % NS Coh
-        computeNSCoherence(coh,cmapn(1,:),Nsig,plotfig,linestyle)
-%     plotNPD_zero(Hz,npdspctrm,data,cmap(1,:),plotfig,linestyle)
+    plotNSCoherence(coh,cmapn(1,:),Nsig,plotfig,linestyle,bstrp)
+    %     plotNPD_zero(Hz,npdspctrm,data,cmap(1,:),plotfig,linestyle)
     % NPD
-    plotNPD(Hz,npdspctrm,data,cmapn(3,:),plotfig,linestyle)
+    plotNPD(Hz,npdspctrm,data,cmapn(3,:),plotfig,linestyle,bstrp)
     % NPDx1
-    plotNPD(Hz,npdspctrmZ,data,cmapn(4,:),plotfig,linestyle)
+    plotNPD(Hz,npdspctrmZ,data,cmapn(4,:),plotfig,linestyle,bstrp)
     %     plotNPD(Hz,npdspctrmW,data,cmap(4,:),plotfig,linestyle)
     
     %% GRANGER
-        figure(2)
-    computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle)
-
-    %% NPD CORR
-%     figure(3)       
-%     plotNPDXCorr(lags,npdcrcv,data,[0 0 0],plotfig,linestyle)
+    figure(2)
+    computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle,0,bstrp)
     
+    %% NPD CORR
+    %     figure(3)
+    %     plotNPDXCorr(lags,npdcrcv,data,[0 0 0],plotfig,linestyle)
     
     a =1;
 end

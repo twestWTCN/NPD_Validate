@@ -1,7 +1,6 @@
 close all; clear all
-%% Simulation 2
-% Effects of Symetric SNR
-fname = 'Figure3';
+%% Figure 2 - Changing Symmetric SNR
+fname = 'Figure2';
 N = 3; % # of nodes
 MO = 3;% model order
 C = repmat(repmat(0.5,N,N).*eye(N),1,1,MO);
@@ -11,7 +10,7 @@ C(3,1,3) = 0.5;
 NCV     = eye(N).*0.3;
 fstord = 2;
 sndord = [2 3];
-mvarconsim_npdver_F3(C,NCV,3)
+wrapper_Fig2_SymSNR(C,NCV,3)
 %
 figure(3)
 set(gcf,'Position',[1077         347         867         734])

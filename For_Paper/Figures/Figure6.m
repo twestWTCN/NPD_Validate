@@ -1,8 +1,7 @@
 close all; clear all
 addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\TWtools')
-%% Simulation 5- Recurrent Connectivity
-% Compute Partialization
-fname = 'Figure5';
+%% Simulation 6B- Model of BG
+fname = 'Figure6B';
 N = 4; % # of nodes
 MO = 4;% model order
 C = repmat(repmat(0,N,N).*eye(N),1,1,MO);
@@ -25,8 +24,7 @@ NCV(2,2) = 0.05;
 NCV(3,3) = 0.05;
 NCV(4,4) = 0.05;
 
-% mvarconsim_npdver_F2b(C,NCV,25)
-mvarconsim_npdver_F5(C,NCV,1)
+wrapper_Fig6B_BGModel(C,NCV,1)
 
 % figure(1)
 figure(2)

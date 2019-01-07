@@ -16,6 +16,18 @@ end
 % subplot(N,N,3); ylim([0 0.5])
 set(gcf,'Position',[1263         100         350         979])
 
-
+%% Simulation 8- STN/M2 Data
+mvarconsim_npdver_F8B(vc_clean,3)
+% figure(2)
+titlist = {'STN \leftrightarrow SMA','STN \rightarrow SMA','SMA \rightarrow STN'};
+ylimlist = {[0 0.1]; [0 0.1]; [0 0.1]};
+for i = 1:3
+    subplot(3,1,i); ylim(ylimlist{i});xlim([0 48])
+    title(titlist{i})
+    legend({'NPD','Granger'})
+end
+% subplot(N,N,2); ylim([0 0.5])
+% subplot(N,N,3); ylim([0 0.5])
+set(gcf,'Position',[1263         100         350         979])
 
 

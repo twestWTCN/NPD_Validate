@@ -1,7 +1,7 @@
 function [] = wrapper_Fig4_SigMix(C,NCV,NC,frstord,sndord,fname)
 
-NCvec = linspace(0,1,NC);
-% NCvec = [0 0.25 0.5];
+% NCvec = linspace(0,1,NC);
+NCvec = [0 0.3 0.6];
 nc_col_sc = [1 0.9 0.8];
 for i = 1:NC
     NCtits{i} = ['SigLeak = ' num2str(NCvec(i))];
@@ -22,14 +22,13 @@ lsstyles = {'-','-.',':'};
     X              = ft_connectivitysimulation(cfg);
 for ncov = 1:NC
     if ncov == 1
-        bstrp = 1;
+        bstrp = 0;
     else 
         bstrp = 0;
     end
     cmapn = cmap.*nc_col_sc(ncov);
     ncv = NCvec(ncov);
 
-    data = X;
     linestyle = lsstyles{ncov};
     % Weighted mixture of signals
     %     sigmix = [
@@ -39,12 +38,15 @@ for ncov = 1:NC
     %         0.1 0.1 0.1 0.7;
     %         ];
     %% Compute Signal Mixing
+    data = X;
     sigmix = repmat(NCvec(ncov)/(Nsig-1),Nsig,Nsig).*~eye(Nsig);
-    sigmix = sigmix+eye(Nsig).*(1-NCvec(ncov));
-    
+    sigmix = sigmix+eye(Nsig).*1; %(1-NCvec(ncov));
+    data.trial{1} = (data.trial{1} -mean(data.trial{1},2))./std(data.trial{1},[],2);
     data.trial{1} = sigmix*data.trial{1};
+    shvar(:,:,ncov) = corr(data.trial{1}');    
     
-    
+    dumdata = randn(size(data.trial{1}));
+    shvar(:,:,ncov) = corr((sigmix*dumdata)');
     %     if ncov == NC
     %         plotfig =1;
     %     else
@@ -91,7 +93,7 @@ for ncov = 1:NC
     a =1;
 end
 
-
+a = 1;
 % cfg = [];
 % cfg.viewmode = 'butterfly';  % you can also specify 'butterfly'
 % ft_databrowser(cfg, data);

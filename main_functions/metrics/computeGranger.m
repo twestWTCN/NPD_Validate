@@ -14,15 +14,17 @@ for i = 1:length(freq.label)
     for j = 1:length(freq.label)
         if mvflag == 0 % Pairwise
             if i == j
-%                 [grangerft,igrangerft] = NPG_freq(freq,[i j],0);
+                %                 [grangerft,igrangerft] = NPG_freq(freq,[i j],0);
             else
                 [grangerft,igrangerft] = NPG_freq(freq,[i j],bstrap);
             end
-        end
-        if i<j
-            ip = 1; jp = 2;
+            if i<j
+                ip = 1; jp = 2;
+            else
+                ip = 2; jp = 1;
+            end
         else
-            ip = 2; jp = 1;
+            ip = i; jp = j;
         end
         if i==j
             granger{1,1}(i,j,:) = null; %squeeze(igrangerft.instantspctrm(1,1,:));
@@ -39,7 +41,7 @@ for i = 1:length(freq.label)
             
             granger{2,1}(i,j,:) = squeeze(igrangerft.cispec(ip,jp,:));
             granger{2,2}(i,j,:) = squeeze(grangerft.cispec(jp,ip,:)); % Backward (j -> i)
-            granger{2,3}(i,j,:) = squeeze(grangerft.cispec(ip,jp,:)); % Forward (i -> j)            
+            granger{2,3}(i,j,:) = squeeze(grangerft.cispec(ip,jp,:)); % Forward (i -> j)
         end
     end
 end

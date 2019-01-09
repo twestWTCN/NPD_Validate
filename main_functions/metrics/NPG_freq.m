@@ -1,11 +1,15 @@
 function [grangerft,igrangerft] = NPG_freq(freq,chinds,bstrap)
 cfg           = [];
-if ~isempty(chinds); cfg.channel   = freq.label(chinds); end
+if ~isempty(chinds)
+    cfg.channel   = freq.label(chinds); 
+end
 cfg.method    = 'granger';
 grangerft       = ft_connectivityanalysis(cfg, freq);
 
 cfg           = [];
-if ~isempty(chinds); cfg.channel   = freq.label(chinds); end
+if ~isempty(chinds)
+    cfg.channel   = freq.label(chinds);
+end
 cfg.method    = 'instantaneous_causality';
 igrangerft      = ft_connectivityanalysis(cfg, freq);
 

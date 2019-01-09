@@ -22,6 +22,11 @@ X              = ft_connectivitysimulation(cfg);
 
 
 for ncov = 1:NC
+    if ncov == 1
+        bstrp = 1;
+    else
+        bstrp = 0;
+    end
     disp(ncov)
     data = X;
         plotfig =0;
@@ -48,19 +53,20 @@ for ncov = 1:NC
 
     %% NPD
     coh = [];
-    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1);
+    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1,8,0,bstrp);
     coh.freq= Hz; coh.cohspctrm = nscohspctrm{1};
     nscoh(ncov) = max(nscohspctrm{1}(2,1,Hz>42 & Hz<62));
-    npd(ncov) = max(npdspctrm{3}(2,1,Hz>42 & Hz<62));
-    
+    npd(ncov) = max(npdspctrm{1,3}(2,1,Hz>42 & Hz<62));
+    npdCi(ncov) = mean(npdspctrm{2,2}(1,2,:));
     % NS Coh
     plotNSCoherence(coh,cmapn(1,:),Nsig,plotfig,linestyle)
     % NPD
     plotNPD(Hz,npdspctrm,data,cmapn(3,:),plotfig,linestyle)
 
     %% GRANGER
-    [Hz granger grangerft] = computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle,0);
-    npGC(ncov) = 0; %max(granger{1,3}(1,2,grangerft.freq>42 & grangerft.freq<62));
+    [Hz granger grangerft] = computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle,0,bstrp);
+    npGC(ncov) = max(granger{1,3}(1,2,grangerft.freq>42 & grangerft.freq<62));
+    npGCci(ncov) = mean(granger{2,2}(1,2,:));
 end
 
 SNRDB = 10*log10(snrbank(:,1));

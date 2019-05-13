@@ -8,14 +8,14 @@ MO = 3;% model order
 C = repmat(repmat(0.5,N,N).*eye(N),1,1,MO);
 C(:,:,2) = -C(:,:,2);
 C(:,:,3) = zeros(N);
-C(2,1,3) = 0.5;
-C(3,2,3) = 0.5;
+C(2,1,3) = 0.3;
+C(3,2,3) = 0.3;
 % C(3,3,1:3) = [-0.5 0.5 0.5];
 NCV     = eye(N).*0.3;
 
 figure(1)
 wrapper_Fig7_IncompleteCond(C,NCV,25)
-ylim([0 0.6])
+ylim([0 0.5])
 set(gcf,'Position',[680   678   483   393])
 % Route X->Y->Z
 C = repmat(repmat(0.5,N,N).*eye(N),1,1,MO);
@@ -25,7 +25,7 @@ C(3,1,3) = 0.3;
 C(2,3,3) = 0.3;
 figure(2)
 wrapper_Fig7_IncompleteCond(C,NCV,25)
-ylim([0 0.6])
+ylim([0 0.5])
 set(gcf,'Position',[680   678   483   393])
 
 % Route X->Y->Z->X
@@ -37,7 +37,7 @@ C(2,3,3) = 0.3;
 C(1,2,3) = 0.3;
 figure(3)
 wrapper_Fig7_IncompleteCond(C,NCV,25)
-ylim([0 0.6])
+ylim([0 0.5])
 set(gcf,'Position',[680   678   483   393])
 
 

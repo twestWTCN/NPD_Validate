@@ -13,7 +13,7 @@ cmap = linspecer(4);
 lsstyles = {'-','-.',':'};
 for ncov = 1:NC
     if ncov == 1
-        bstrp = 1;
+        bstrp = 0;
     else
         bstrp = 0;
     end

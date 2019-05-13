@@ -1,4 +1,4 @@
-NPD_Validate_AddPaths()
+% NPD_Validate_AddPaths()
 % % % mvarconsim_npdver(C,NCV,fstord,sndord,fname)
 close all
 

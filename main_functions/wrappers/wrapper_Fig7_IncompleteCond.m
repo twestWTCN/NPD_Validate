@@ -22,8 +22,13 @@ X              = ft_connectivitysimulation(cfg);
 
 
 for ncov = 1:NC
-rng(124321)
-        plotfig =0;
+    if ncov == 1
+        bstrp = 0;
+    else
+        bstrp = 0;
+    end
+    rng(124321)
+    plotfig =0;
     linestyle = lsstyles{1};
     cmapn = cmap.*nc_col_sc(1);
     ncv = NCvec(ncov);
@@ -38,44 +43,48 @@ rng(124321)
         snrbank(ncov,i) = snr;
         data.trial{1}(i,:) = y;
     end
-
-
+    
+    
     %% Plot Example Trace
-%     figure(1)
-%     plot(X.time{1},X.trial{1}+[0 2.5 5]');
-%     xlim([100 105])
-%     xlabel('Time'); ylabel('Amplitude'); grid on
-%     legend({'X1','X2','X3'})
+    %     figure(1)
+    %     plot(X.time{1},X.trial{1}+[0 2.5 5]');
+    %     xlim([100 105])
+    %     xlabel('Time'); ylabel('Amplitude'); grid on
+    %     legend({'X1','X2','X3'})
     
     freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle);
     pow = mean(abs(squeeze(freq.fourierspctrm(:,1,:))),1);
     npPow(ncov) = max(pow(freq.freq>42 & freq.freq<62));
-
+    
     %% NPD
     coh = [];
-    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,2,8,1,0);
+    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,2,8,1,bstrp);
     coh.freq= Hz; coh.cohspctrm = nscohspctrm{1};
     nscoh(ncov) = max(nscohspctrm{1}(3,1,Hz>42 & Hz<62)); %-max(nscohspctrm(1,2,Hz>42 & Hz<62));
     npd(ncov) = max(npdspctrm{1,2}(3,1,Hz>42 & Hz<62)); %- max(npdspctrm{3}(2,1,Hz>42 & Hz<62));
     npdz(ncov) = max(npdspctrmZ{1,2}(3,1,Hz>42 & Hz<62)); %- max(npdspctrm{3}(2,1,Hz>42 & Hz<62));
+    npdCi(ncov) = mean(npdspctrm{2,2}(3,1,:));
+    
     % NS Coh
     plotNSCoherence(coh,cmapn(1,:),Nsig,plotfig,linestyle)
     % NPD
-%     plotNPD(Hz,npdspctrm,data,cmapn(3,:),1,linestyle)
-%     plotNPD(Hz,npdspctrmW,data,cmapn(4,:),1,linestyle)
-% 
+    %     plotNPD(Hz,npdspctrm,data,cmapn(3,:),1,linestyle)
+    %     plotNPD(Hz,npdspctrmW,data,cmapn(4,:),1,linestyle)
+    %
     %% GRANGER
-%     [Hz granger grangerft] = computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle,0);
-%     npGCpw(ncov) = max(granger{1,2}(3,1,grangerft.freq>42 & grangerft.freq<62));
-    [Hz granger grangerft] = computeGranger(freq,cmapn(1,:),Nsig,plotfig,linestyle,1);
+    %     [Hz granger grangerft] = computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle,0);
+    %     npGCpw(ncov) = max(granger{1,2}(3,1,grangerft.freq>42 & grangerft.freq<62));
+    [Hz granger grangerft] = computeGranger(freq,cmapn(1,:),Nsig,plotfig,linestyle,1,bstrp);
     npGCmv(ncov) = max(granger{1,2}(3,1,grangerft.freq>42 & grangerft.freq<62));
-    
-%     %% NPD CORR
-%         figure(3)
-%         plotNPDXCorr(lags,npdcrcv,data,cmapn(3,:),0,linestyle)
-%         plotNPDXCorr(lags,npdcrcvW,data,cmapn(4,:),0,linestyle)
+    npGCci(ncov) = mean(granger{2,2}(3,1,:));
+    %     %% NPD CORR
+    %         figure(3)
+    %         plotNPDXCorr(lags,npdcrcv,data,cmapn(3,:),0,linestyle)
+    %         plotNPDXCorr(lags,npdcrcvW,data,cmapn(4,:),0,linestyle)
     a =1;
 end
+% save('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F7_CItab','npdCi','npGCci')
+load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F7_CItab','npdCi','npGCci')
 
 
 SNRDB = 10*log10(snrbank(:,2));
@@ -85,7 +94,10 @@ A = SNRDB;
 % scatter(NCvec(1,:),nscoh,40,cmapn(1,:),'filled')
 hold on
 scatter(A,npd,40,cmapn(3,:),'Marker','+','LineWidth',3)
+plot(A,repmat(npdCi(1),1,size(A,1)),'LineStyle','--','color',cmapn(3,:))
+
 scatter(A,npGCmv,40,cmapn(2,:),'filled')
+plot(A,repmat(npGCci(1),1,size(A,1)),'LineStyle','--','color',cmapn(2,:))
 scatter(A,npdz,40,cmapn(4,:),'filled')
 % scatter(A,npGCmv,40,cmapn(1,:),'filled')
 grid on

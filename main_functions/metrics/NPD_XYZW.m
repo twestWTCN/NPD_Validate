@@ -1,12 +1,12 @@
 function [f13 t13 f13Z t13Z f13W t13W ci13 ci13Z ci13W] = NPD_XYZW(x,y,z,w,fsamp,npdord,bstrp)
 %                 [f13,~,~]=sp2a2_R2_mt(x',y',FTdata.fsample,7,'M1');
-[f13,t13,c13]=sp2a2_R2(x',y',fsamp,npdord);
+[f13,t13,~]=sp2a2_R2_tw(x',y',fsamp,npdord);
 winsize = fix(2^npdord);
 if rem(winsize,2)
     winsize = winsize +1;
 end
-[f13Z,t13Z]=sp2_R2a_pc1(x',y',z',fsamp,winsize);
-[f13W,t13W]=sp2_R2a_pc1(x',y',w',fsamp,winsize);
+[f13Z,t13Z,~]=sp2_R2a_pc1_tw(x',y',z',fsamp,winsize);
+[f13W,t13W,~]=sp2_R2a_pc1_tw(x',y',w',fsamp,winsize);
 
 if bstrp == 1
     bsn = 200;

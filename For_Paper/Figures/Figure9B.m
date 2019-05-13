@@ -2,7 +2,7 @@ close all; %clear
 addpath('C:\Users\Tim\Documents\Work\GIT\BrewerMap')
 cmap = linspecer(4);
 
-%% Simulation 9B - Data Length with Fixed Number of Trials (n=10)
+%% Simulation 9B - Data Length with Fixed Number of Trials (n=50)
 rng(543)
 ncons = 4;
 nreps = 20;
@@ -21,7 +21,7 @@ for dataLen = 1:size(NCvec,2)
             cfg             = [];
             cfg.fsample     = 200;
             cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
-            cfg.ntrials     = 10;
+            cfg.ntrials     = 50;
             cfg.nsignal     = 3;
             cfg.method      = 'ar';
             cfg.params = CMat{i,n};
@@ -30,13 +30,13 @@ for dataLen = 1:size(NCvec,2)
             disp([dataLen i n])
         end
     end
-    mkdir(['C:\Users\Tim\Documents\Work\GIT\NPD_Validate\benchmark'])
-    save(['C:\Users\Tim\Documents\Work\GIT\NPD_Validate\benchmark\simdata_9B_' num2str(dataLen)],'data')
+    mkdir([cd '\benchmark'])
+    save([cd '\benchmark\simdata_9B_' num2str(dataLen)],'data')
 end
 
 % Now test for recovery with dFC metrics
 for dataLen = 1:size(NCvec,2)
-    load(['C:\Users\Tim\Documents\Work\GIT\NPD_Validate\benchmark\simdata_9B_' num2str(dataLen)],'data')
+    load([cd '\benchmark\simdata_9B_' num2str(dataLen)],'data')
     bstrap = 1;
     for i = 1:ncons
         for n = 1:nreps
@@ -47,24 +47,27 @@ for dataLen = 1:size(NCvec,2)
             
             dataN = data{i,n};
             freq = computeSpectra(dataN,[0 0 0],3,0,'-',-1,dataN.cfg.triallength);
-            [Hz granger grangerft] = computeGranger(freq,cmap(2,:),3,0,'--',1,bstrap);
+            [Hz granger grangerft] = computeGranger(freq,cmap(2,:),3,1,'--',1,bstrap);
             [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(dataN,1,(NCvec(dataLen)),1,bstrap);
-            plotNPD(Hz,npdspctrm,dataN,cmap(3,:),0,':',0)
+            plotNPD(Hz,npdspctrm,dataN,cmap(3,:),1,':',0)
             if bstrap == 1
-                NPG_ci= granger{2,2};
-                NPD_ci = npdspctrm{2,2};
+                NPG_ci{dataLen}= granger{2,2};
+                NPD_ci{dataLen} = npdspctrm{2,2};
                 bstrap = 0;
+                save([cd '\benchmark\9B_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
+            else
+                load([cd '\benchmark\9B_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
             end
             
             % Now estimate
             NPG = granger{1,2};
-            A = squeeze(sum((NPG >NPG_ci),3));
+            A = squeeze(sum((NPG >NPG_ci{dataLen}),3));
             crit = ceil(size(NPG,3).*0.1);
             A = A>crit;
             NPGScore(dataLen,i,n) =  sum((A(:)-Z(:)).^2);
             
             NPD = npdspctrm{1,2};
-            B = squeeze(sum((NPD >NPD_ci),3));
+            B = squeeze(sum((NPD >NPD_ci{dataLen}),3));
             crit = ceil(size(NPD,3).*0.1);
             B = B>crit;
             NPDScore(dataLen,i,n) = sum((B(:)-Z(:)).^2);
@@ -72,9 +75,9 @@ for dataLen = 1:size(NCvec,2)
     end
 end
 
-save('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\benchmark\9BBenchMarks','NPGScore','NPGScore','NCvec','DA')
+save([cd '\benchmark\9BBenchMarks'],'NPGScore','NPGScore','NCvec','DA')
 
-load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\benchmark\9BBenchMarks','NPGScore','NPGScore','NCvec','DA')
+load([cd '\benchmark\9BBenchMarks'],'NPGScore','NPGScore','NCvec','DA')
 subplot(1,2,2)
 a = plot(NCvec,1-mean(NPGScore,3));
 rcmap = brewermap(6,'Reds');

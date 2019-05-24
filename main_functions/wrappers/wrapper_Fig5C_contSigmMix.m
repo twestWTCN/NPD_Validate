@@ -5,6 +5,7 @@ nc_col_sc = [1 0.9 0.8];
 for i = 1:NC
     NCtits{i} = ['SigLeak = ' num2str(NCvec(i))];
 end
+rng(2321)
 
 cmap = linspecer(4);
 lsstyles = {'-','-.',':'};
@@ -21,7 +22,11 @@ cfg.params = C;
 cfg.noisecov = NCV;
 X = ft_connectivitysimulation(cfg);
 for ncov = 1:NC
-    data = X;
+    if ncov == 1
+        bstrp = 0;
+    else
+        bstrp = 0;
+    end
     linestyle = '--';
     % Weighted mixture of signals
     %     sigmix = [
@@ -36,7 +41,10 @@ for ncov = 1:NC
     sigmix = sigmix+eye(Nsig).*1; %(1-NCvec(ncov));
     data.trial{1} = (data.trial{1} -mean(data.trial{1},2))./std(data.trial{1},[],2);
     data.trial{1} = sigmix*data.trial{1};
-    shvar(:,:,ncov) = corr(data.trial{1}');
+%     shvar(:,:,ncov) = corr(data.trial{1}');
+    
+    dumdata = randn(size(data.trial{1}));
+    shvar(:,:,ncov) = corr((sigmix*dumdata)');
     %     if ncov == NC
     %         plotfig =1;
     %     else
@@ -49,10 +57,11 @@ for ncov = 1:NC
     npPow(ncov) = max(pow(freq.freq>42 & freq.freq<62));
     
     %% NPD
-    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1);
+    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1,8,1,bstrp);
     coh.freq= Hz; coh.cohspctrm = nscohspctrm{1};
-    nscoh(ncov) = max(nscohspctrm{1}(2,1,Hz>42 & Hz<62));
-    npd(ncov) = max(npdspctrm{3}(2,1,Hz>42 & Hz<62));
+    nscoh(ncov) = max(nscohspctrm{1}(1,2,Hz>42 & Hz<62));
+    npd(ncov) = max(npdspctrm{1,3}(1,2,Hz>42 & Hz<62));
+    npdCi(ncov) = mean(npdspctrm{2,2}(1,2,:));
     % NS Coh
     %     plotNSCoherence(coh,cmapn(1,:),Nsig,plotfig,linestyle)
     plotNPD_zero(Hz,npdspctrm,data,cmap(1,:),plotfig,linestyle)
@@ -63,9 +72,13 @@ for ncov = 1:NC
     %     plotNPD(Hz,npdspctrmW,data,cmap(4,:),plotfig,linestyle)
     
     %% GRANGER
-    [Hz granger grangerft] = computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle,0);
-    npGC(ncov) =  max(granger{1,3}(1,2,grangerft.freq>42 & grangerft.freq<62));
+    [~, granger grangerft] = computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle,1,bstrp);
+    npGC(ncov) = max(granger{1,3}(1,2,grangerft.freq>42 & grangerft.freq<62));
+    npGCci(ncov) = mean(granger{2,2}(1,2,:));
 end
+% save('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5C_CItab','npdCi','npGCci')
+load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5C_CItab','npdCi','npGCci')
+
 for i = 1:size(shvar,3)
     p = shvar(:,:,i).*abs(eye(3)-1);
     x(i) =  sum(p(:))./sum(abs(p(:))>0);
@@ -76,7 +89,13 @@ figure(3)
 scatter(x,nscoh,50,cmapn(1,:),'Marker','+','LineWidth',3);
 hold on
 scatter(x,npd,40,cmapn(3,:),'filled')
+plot(x,repmat(npdCi(1),1,size(x,2)),'LineStyle','--','color',cmapn(3,:))
+plot(x,-repmat(npdCi(1),1,size(x,2)),'LineStyle','--','color',cmapn(3,:))
+
 scatter(x,npGC,40,cmapn(2,:),'filled')
+plot(x,repmat(npGCci(1),1,size(x,2)),'LineStyle','--','color',cmapn(2,:))
+plot(x,-repmat(npGCci(1),1,size(x,2)),'LineStyle','--','color',cmapn(2,:))
+
 grid on
 xlabel('Shared Variance (correlation)');ylabel('FC Magnitude')
 legend({'Coherence','NPD','Granger'})

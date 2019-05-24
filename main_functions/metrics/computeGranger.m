@@ -48,7 +48,8 @@ end
 
 
 if plotfig
-    plotNPD(grangerft.freq,granger,freq,cmap,1,linestyle,bstrap)
+%     plotNPD(grangerft.freq,granger,freq,cmap,1,linestyle,bstrap)
+    plotDiffNPD(grangerft.freq,granger,freq,cmap,1,linestyle,bstrap)
 end
 
 

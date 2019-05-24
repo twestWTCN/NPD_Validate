@@ -1,19 +1,29 @@
-function freq = computeSpectra(data,cmap,Nsig,plotfig,linestyle,smord)
+function freq = computeSpectra(data,cmap,Nsig,plotfig,linestyle,smord,dl)
 if nargin<6
     smord = 2;
 end
+if nargin<7
+    dl = 1;
+end
+if smord == -1
+    tname = 'hanning';
+else
+    tname = 'dpss';
+end
 cfg = [];
-cfg.length  = 1;
+cfg.length  = dl;
 data = ft_redefinetrial(cfg,data);
 %% Compute Spectra
 cfg           = [];
 cfg.method    = 'mtmfft';
-cfg.taper     = 'dpss';
+cfg.taper     = tname;
 cfg.output    = 'fourier';
-cfg.tapsmofrq = smord;
+if smord >0
+    cfg.tapsmofrq = smord;
+end
 cfg.keeptrials = 'yes';
 cfg.padtype = 'zero';
-cfg.pad = 2;
+% cfg.pad = 2;
 freq          = ft_freqanalysis(cfg, data);
 if plotfig
     

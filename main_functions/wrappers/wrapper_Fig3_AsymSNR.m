@@ -9,7 +9,7 @@ nc_col_sc = [1 0.9 0.8];
 for i = 1:NC
     NCtits{i} = ['SigLeak = ' num2str(NCvec(i))];
 end
-
+rng(8281)
 cmap = linspecer(4);
 lsstyles = {'-','-.',':'};
 Nsig = size(C,1);
@@ -26,7 +26,7 @@ X              = ft_connectivitysimulation(cfg);
 
 for ncov = 1:NC
     if ncov == 1
-        bstrp = 1;
+        bstrp = 0;
     else
         bstrp = 0;
     end
@@ -72,11 +72,11 @@ for ncov = 1:NC
     %     computeNSCoherence(coh,cmapn(1,:),Nsig,plotfig,linestyle)
     %     plotNPD_zero(Hz,npdspctrm,data,cmap(1,:),plotfig,linestyle)
     % NPD
-    plotNPD(Hz,npdspctrm,data,cmapn(3,:),plotfig,linestyle,bstrp)
+%     plotNPD(Hz,npdspctrm,data,cmapn(3,:),plotfig,linestyle,bstrp)
     % NPDx1
     %     plotNPD(Hz,npdspctrmZ,data,cmapn(4,:),plotfig,linestyle)
     %     plotNPD(Hz,npdspctrmW,data,cmap(4,:),plotfig,linestyle)
-    
+    plotDiffNPD(Hz,npdspctrm,data,cmapn(3,:),plotfig,linestyle,bstrp)
     %% GRANGER
     figure(2)
     computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle,0,bstrp)

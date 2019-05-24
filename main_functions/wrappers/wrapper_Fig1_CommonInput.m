@@ -23,11 +23,11 @@ data              = ft_connectivitysimulation(cfg);
 
 for ncov = 1:NC
     if ncov == 1
-        bstrp = 1;
+        bstrp = 0;
     else
         bstrp = 0;
     end
-    cmapn = cmap.*nc_col_sc(ncov)
+    cmapn = cmap.*nc_col_sc(ncov);
     ncv = NCvec(ncov);
     
     linestyle = lsstyles{ncov};
@@ -83,7 +83,7 @@ for ncov = 1:NC
     
     %% GRANGER
     figure(2)
-    computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle,0,bstrp)
+    computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle,1,bstrp)
     
     %% NPD CORR
     %     figure(3)
@@ -91,6 +91,8 @@ for ncov = 1:NC
     
     a =1;
 end
+% save('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F1_CItab','npdCi','npGCci')
+load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F1A_CItab','npdCi','npGCci')
 
 
 % cfg = [];

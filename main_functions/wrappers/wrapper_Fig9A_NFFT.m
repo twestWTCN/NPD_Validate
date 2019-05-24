@@ -1,27 +1,29 @@
-function [] = wrapper_Fig5A_SymSNR(C,NCV,NC)
-NCvec = logspace(log10(0.001),log10(1000),NC);
-% NCvec = linspace(0.001,10,NC);
-NCvec = sqrt(NCvec); % Convert to std
-
+function [] = wrapper_Fig9A_NFFT(C,NCV,NC)
+NCvec = linspace(6,10,10);
+Nsamps = 150;
 for i = 1:NC
-    NCtits{i} = ['SigLeak = ' num2str(NCvec(i))];
+    NCtits{i} = ['NFFT = ' num2str(NCvec(i))];
 end
-rng(12312)
-cmap = linspecer(4);
-lsstyles = {'-','-.',':'};
-Nsig = size(C,1);
-cfg             = [];
-cfg.ntrials     = 1;
-cfg.triallength = 250;
-cfg.fsample     = 200;
-cfg.nsignal     = Nsig;
-cfg.method      = 'ar';
-cfg.params = C;
-cfg.noisecov = NCV;
-X              = ft_connectivitysimulation(cfg);
 
 
 for ncov = 1:NC
+   
+    rng(12312)
+    cmap = linspecer(4);
+    lsstyles = {'-','-.',':'};
+    Nsig = size(C,1);
+    cfg             = [];
+    cfg.ntrials     = 1;
+    cfg.fsample     = 200;
+    % compute data availability
+    tl = (2^NCvec)*Nsamps;
+    cfg.triallength = 250;
+    cfg.nsignal     = Nsig;
+    cfg.method      = 'ar';
+    cfg.params = C;
+    cfg.noisecov = NCV;
+    X   = ft_connectivitysimulation(cfg);
+    
     if ncov == 1
         bstrp = 0;
     else
@@ -33,18 +35,6 @@ for ncov = 1:NC
     linestyle = '-';
     cmapn = cmap;
     ncv = NCvec(ncov);
-    
-    %% Compute SNR
-    randproc = randn(size(data.trial{1}));
-    for i = 1:size(randproc,1)
-        s = data.trial{1}(i,:);
-        s = (s-mean(s))./std(s);
-        n = (ncv.*randproc(i,:));
-        y = s + n;
-        snr = var(s)/var(n);
-        snrbank(ncov,i) = snr;
-        data.trial{1}(i,:) = y;
-    end
     
     %% Power
     freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle);

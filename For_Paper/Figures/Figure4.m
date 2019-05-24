@@ -18,9 +18,9 @@ set(gcf,'Position',[1077         347         867         734])
 legend('\lambda = 0','\lambda = 0.3','\lambda = 0.6')
 
 figure(2)
-subplot(N,N,1); ylim([0 0.15])
-subplot(N,N,5); ylim([0 0.15])
-subplot(N,N,9); ylim([0 0.15])
+subplot(N,N,1); ylim([0 0.2])
+subplot(N,N,5); ylim([0 0.2])
+subplot(N,N,9); ylim([0 0.2])
 legend({'Power','Zero-NPD','NPD','Granger'})
 set(gcf,'Position',[1077         347         867         734])
 

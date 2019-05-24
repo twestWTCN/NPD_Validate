@@ -1,20 +1,20 @@
-function [CMat,NCV] = makeRndGraphs(nc,nreps)
+function [CMat,NCV] = makeRndGraphs(nc,nreps,sz)
 
 % Create a connectivity matrix of 1-4 connections
 % possible connections
-clist = combvec(1:3,1:3);
+clist = combvec(1:sz,1:sz);
 clist(:,diff(clist)==0) = []; % remove self
 % Make template connection matrix
-A = repmat(repmat(0.5,3,3).*eye(3),1,1,3);
+A = repmat(repmat(0.5,sz,sz).*eye(sz),1,1,sz);
 A(:,:,2) = -A(:,:,1);
 % noise covarianc matrix
-NCV     = eye(3).*0.3;
+NCV     = eye(sz).*0.3;
 
 
 for i = 1:nc
     for n = 1:nreps
         csel = randsample(1:size(clist,2),i);
-        osel = randi(3,1,size(csel,1),i);
+        osel = randi(sz,1,size(csel,1),i);
         CMat{i,n} = placeCon(A,clist(:,csel),osel,0.3);
         
 %         cfg             = [];

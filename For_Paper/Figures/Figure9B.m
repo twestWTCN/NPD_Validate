@@ -1,12 +1,13 @@
-close all; %clear
+close all; clear
 addpath('C:\Users\Tim\Documents\Work\GIT\BrewerMap')
 cmap = linspecer(4);
 
 %% Simulation 9B - Data Length with Fixed Number of Trials (n=50)
-rng(543)
+rng(927693)
 ncons = 4;
-nreps = 20;
-[CMat,NCV] = makeRndGraphs(ncons,nreps);
+nreps = 25;
+sz = 3;
+[CMat,NCV] = makeRndGraphs(ncons,nreps,sz);
 NCvec = linspace(5,11,12);
 % Nsamps = 150;
 
@@ -21,8 +22,8 @@ for dataLen = 1:size(NCvec,2)
             cfg             = [];
             cfg.fsample     = 200;
             cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
-            cfg.ntrials     = 50;
-            cfg.nsignal     = 3;
+            cfg.ntrials     = 30;
+            cfg.nsignal     = sz;
             cfg.method      = 'ar';
             cfg.params = CMat{i,n};
             cfg.noisecov = NCV;
@@ -37,7 +38,7 @@ end
 % Now test for recovery with dFC metrics
 for dataLen = 1:size(NCvec,2)
     load([cd '\benchmark\simdata_9B_' num2str(dataLen)],'data')
-    bstrap = 1;
+    bstrap = 0;
     for i = 1:ncons
         for n = 1:nreps
             TrueCMat = CMat{i,n};
@@ -70,14 +71,15 @@ for dataLen = 1:size(NCvec,2)
             B = squeeze(sum((NPD >NPD_ci{dataLen}),3));
             crit = ceil(size(NPD,3).*0.1);
             B = B>crit;
+            
             NPDScore(dataLen,i,n) = sum((B(:)-Z(:)).^2);
+            disp([dataLen i n])
         end
     end
 end
 
-save([cd '\benchmark\9BBenchMarks'],'NPGScore','NPGScore','NCvec','DA')
-
-load([cd '\benchmark\9BBenchMarks'],'NPGScore','NPGScore','NCvec','DA')
+save([cd '\benchmark\9BBenchMarks'],'NPGScore','NPGScore','NCvec')
+load([cd '\benchmark\9BBenchMarks'],'NPGScore','NPGScore','NCvec')
 subplot(1,2,2)
 a = plot(NCvec,1-mean(NPGScore,3));
 rcmap = brewermap(6,'Reds');
@@ -93,7 +95,7 @@ grid on
 xlabel('Trial Length (2^n)')
 ylabel('Estimation Accuracy')
 title('Effects of Trial Length on Connection Recovery with mvNPG')
-ylim([-3 1.25])
+% ylim([-3 1.25])
 subplot(1,2,1)
 b = plot(NCvec,1-mean(NPDScore,3));
 bcmap = brewermap(6,'Blues');
@@ -109,5 +111,5 @@ grid on
 xlabel('Trial Length (2^n)')
 ylabel('Estimation Accuracy')
 title('Effects of Trial Length on Connection Recovery with NPD')
-ylim([-3 1.25])
+% ylim([-3 1.25])
 set(gcf,'Position',[353         512         1120         446])

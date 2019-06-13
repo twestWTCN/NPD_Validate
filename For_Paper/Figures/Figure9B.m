@@ -5,34 +5,34 @@ cmap = linspecer(4);
 %% Simulation 9B - Data Length with Fixed Number of Trials (n=50)
 rng(543)
 ncons = 4;
-nreps = 20;
+nreps = 10; %20;
 [CMat,NCV] = makeRndGraphs(ncons,nreps);
 NCvec = linspace(5,11,12);
 % Nsamps = 150;
 
 % Simulate data
 
-for dataLen = 1:size(NCvec,2)
-    clear data
-    rng(645634)
-    for i = 1:ncons
-        for n = 1:nreps
-            % Simulate Data
-            cfg             = [];
-            cfg.fsample     = 200;
-            cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
-            cfg.ntrials     = 50;
-            cfg.nsignal     = 3;
-            cfg.method      = 'ar';
-            cfg.params = CMat{i,n};
-            cfg.noisecov = NCV;
-            data{i,n} = ft_connectivitysimulation(cfg);
-            disp([dataLen i n])
-        end
-    end
-    mkdir([cd '\benchmark'])
-    save([cd '\benchmark\simdata_9B_' num2str(dataLen)],'data')
-end
+% for dataLen = 1:size(NCvec,2)
+%     clear data
+%     rng(645634)
+%     for i = 1:ncons
+%         for n = 1:nreps
+%             % Simulate Data
+%             cfg             = [];
+%             cfg.fsample     = 200;
+%             cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
+%             cfg.ntrials     = 50;
+%             cfg.nsignal     = 3;
+%             cfg.method      = 'ar';
+%             cfg.params = CMat{i,n};
+%             cfg.noisecov = NCV;
+%             data{i,n} = ft_connectivitysimulation(cfg);
+%             disp([dataLen i n])
+%         end
+%     end
+%     mkdir([cd '\benchmark'])
+%     save([cd '\benchmark\simdata_9B_' num2str(dataLen)],'data')
+% end
 
 % Now test for recovery with dFC metrics
 for dataLen = 1:size(NCvec,2)
@@ -75,9 +75,9 @@ for dataLen = 1:size(NCvec,2)
     end
 end
 
-save([cd '\benchmark\9BBenchMarks'],'NPGScore','NPGScore','NCvec','DA')
+save([cd '\benchmark\9BBenchMarks'],'NPDScore','NPGScore','NCvec','DA')
 
-load([cd '\benchmark\9BBenchMarks'],'NPGScore','NPGScore','NCvec','DA')
+load([cd '\benchmark\9BBenchMarks.mat'],'NPDScore','NPGScore','NCvec','DA')
 subplot(1,2,2)
 a = plot(NCvec,1-mean(NPGScore,3));
 rcmap = brewermap(6,'Reds');

@@ -22,49 +22,49 @@ SigMixvec = linspace(0,2,NC);
 
 % Simulate data
 
-for SNR = 1:size(SNRvec,2)
-    clear data
-    for SMx = 1:size(SigMixvec,2)
-        parfor n = 1:nreps
-            % Simulate Data
-            cfg             = [];
-            cfg.fsample     = 200;
-            cfg.triallength = 500;
-            cfg.ntrials     = 1;
-            cfg.nsignal     = 3;
-            cfg.method      = 'ar';
-            cfg.params = CMat{2,n}; %selected two connections here!
-            cfg.noisecov = NCV;
-            data_raw = ft_connectivitysimulation(cfg);
-            
-            % Do the Signal Mixing
-            data = data_raw;
-            sigmix = repmat(SigMixvec(SMx)/(Nsig-1),Nsig,Nsig).*~eye(Nsig);
-            sigmix = sigmix+eye(Nsig).*1; %(1-NCvec(ncov));
-            data.trial{1} = (data.trial{1} -mean(data.trial{1},2))./std(data.trial{1},[],2);
-            data.trial{1} = sigmix*data.trial{1};
-            
-            % NowDo the ASNR
-            randproc = randn(size(data.trial{1}));
-            for i = 1:size(randproc,1)
-                s = data.trial{1}(i,:);
-                s = (s-mean(s))./std(s);
-                nr  =((SNRvec(i,SNR)*1).*randproc(i,:));
-                y = s+nr;
-                snr = var(s)/var(nr);
-                disp(snr)
-%                 snrbank(SMx,n,i) = snr;
-                %         y = (y-mean(y))./std(y);
-                data.trial{1}(i,:) = y;
-            end
-            
-             dataBank{SNR,SMx,n} = data;
-            disp([SNR SMx n])
-        end
-    end
-    mkdir([cd '\benchmark'])
-    save([cd '\benchmark\simdata_10'],'dataBank')
-end
+% for SNR = 1:size(SNRvec,2)
+%     clear data
+%     for SMx = 1:size(SigMixvec,2)
+%         parfor n = 1:nreps
+%             % Simulate Data
+%             cfg             = [];
+%             cfg.fsample     = 200;
+%             cfg.triallength = 500;
+%             cfg.ntrials     = 1;
+%             cfg.nsignal     = 3;
+%             cfg.method      = 'ar';
+%             cfg.params = CMat{2,n}; %selected two connections here!
+%             cfg.noisecov = NCV;
+%             data_raw = ft_connectivitysimulation(cfg);
+%             
+%             % Do the Signal Mixing
+%             data = data_raw;
+%             sigmix = repmat(SigMixvec(SMx)/(Nsig-1),Nsig,Nsig).*~eye(Nsig);
+%             sigmix = sigmix+eye(Nsig).*1; %(1-NCvec(ncov));
+%             data.trial{1} = (data.trial{1} -mean(data.trial{1},2))./std(data.trial{1},[],2);
+%             data.trial{1} = sigmix*data.trial{1};
+%             
+%             % NowDo the ASNR
+%             randproc = randn(size(data.trial{1}));
+%             for i = 1:size(randproc,1)
+%                 s = data.trial{1}(i,:);
+%                 s = (s-mean(s))./std(s);
+%                 nr  =((SNRvec(i,SNR)*1).*randproc(i,:));
+%                 y = s+nr;
+%                 snr = var(s)/var(nr);
+%                 disp(snr)
+% %                 snrbank(SMx,n,i) = snr;
+%                 %         y = (y-mean(y))./std(y);
+%                 data.trial{1}(i,:) = y;
+%             end
+%             
+%              dataBank{SNR,SMx,n} = data;
+%             disp([SNR SMx n])
+%         end
+%     end
+%     mkdir([cd '\benchmark'])
+%     save([cd '\benchmark\simdata_10'],'dataBank')
+% end
 
 % Now test for recovery with dFC metrics
     load([cd '\benchmark\simdata_10'],'dataBank')
@@ -95,16 +95,20 @@ for SNR = 1:size(SNRvec,2)
             
             % Now estimate
             NPG = granger{1,2};
-            A = squeeze(sum((NPG >NPG_ci),3));
+            A = squeeze(sum((NPG>NPG_ci{SNR,SMx}),3));
             crit = ceil(size(NPG,3).*0.1);
-            A = A>crit;
-            NPGScore(dataLen,i,n) =  sum((A(:)-Z(:)).^2);
+            Ac = A>crit;
+            SA = Ac+Z;
+            NPGScore(SNR,SMx,n) = 100.*(sum(SA(:)== 2 | SA(:)== 0) - size(diag(Ac),1))./(numel(Ac) - size(diag(Ac),1));
             
             NPD = npdspctrm{1,2};
-            B = squeeze(sum((NPD >NPD_ci),3));
+            B = squeeze(sum((NPD>NPD_ci{SNR,SMx}),3));
             crit = ceil(size(NPD,3).*0.1);
-            B = B>crit;
-            NPDScore(dataLen,i,n) = sum((B(:)-Z(:)).^2);
+            Bc = B>crit;
+            SB = Bc+Z;
+            NPDScore(SNR,SMx,n) = 100.*(sum(SB(:)== 2 | SB(:)== 0) - size(diag(Bc),1))./(numel(Bc) - size(diag(Bc),1));
+            %             NPDScore(dataLen,i,n) = sum((B(:)-Z(:)).^2);
+            disp([SNR,SMx,n])
         end
     end
 end

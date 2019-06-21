@@ -9,7 +9,7 @@ end
 [f13W,t13W,~]=sp2_R2a_pc1_tw(x',y',w',fsamp,winsize);
 
 if bstrp == 1
-    bsn = 30; %200;
+    bsn = 100; %200;
     disp('bsn is v low!')
     sf13 = nan([bsn,size(f13)]);
     st13 = nan([bsn,size(t13)]);

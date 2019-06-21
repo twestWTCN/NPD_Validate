@@ -1,9 +1,12 @@
 function NPD_Validate_AddPaths()
 if strmatch(getenv('computername'),'FREE')
+spmpath = 'C:\spm12';
+% spmpath = 'C:\Users\timot\Documents\GitHub\spm12';
+preFix_MLAD = 'C:\Users\twest\Documents\Work\MATLAB ADDONS\';
+% preFix_MLAD = 'C:\Users\timot\Documents\Work\MATLAB ADDONS\';
+preFix_Git = 'C:\Users\twest\Documents\Work\GitHub\';
+% preFix_Git = 'C:\Users\timot\Documents\GitHub\';
 
-spmpath = 'C:\Users\timot\Documents\GitHub\spm12';
-preFix_MLAD = 'C:\Users\timot\Documents\Work\MATLAB ADDONS\';
-preFix_Git = 'C:\Users\timot\Documents\GitHub\';
 end
 addpath([preFix_MLAD 'linspecer'])
 % addpath('C:\spm12'); spm eeg; close all

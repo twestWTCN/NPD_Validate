@@ -5,39 +5,40 @@ cmap = linspecer(4);
 %% Simulation 9A - Data Length with Fixed Data Length (25s)
 rng(927693)
 ncons = 4;
-nreps = 20;
+nreps = 2;
 [CMat,NCV] = makeRndGraphs(ncons,nreps,3);
-NCvec = linspace(5,12,12);
-DA = 100; % Total data availability (100s)
+NCvec = linspace(5,11,12);
+DA = 30; % Total data availability (100s)
 
 % Nsamps = 150;
 
 % Simulate data
-for dataLen = 1:size(NCvec,2)
-    clear data
-    rng(7865734)
-    for i = 1:ncons
-        parfor n = 1:nreps
-%             Simulate Data
-            cfg             = [];
-            cfg.fsample     = 200;
-            cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
-            cfg.ntrials     = ceil(DA./cfg.triallength);
-            cfg.nsignal     = 3;
-            cfg.method      = 'ar';
-            cfg.params = CMat{i,n};
-            cfg.noisecov = NCV;
-            data{i,n} = ft_connectivitysimulation(cfg);
-            disp([dataLen i n])
-        end
-    end
-    mkdir([cd '\benchmark'])
-    save([cd '\benchmark\simdata_9A_' num2str(dataLen)],'data')
-end
+% %
+% % for dataLen = 1:size(NCvec,2)
+% %     clear data
+% %     rng(7865734)
+% %     for i = 1:ncons
+% %         for n = 1:nreps
+% %             % Simulate Data
+% %             cfg             = [];
+% %             cfg.fsample     = 200;
+% %             cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
+% %             cfg.ntrials     = ceil(DA./cfg.triallength);
+% %             cfg.nsignal     = 3;
+% %             cfg.method      = 'ar';
+% %             cfg.params = CMat{i,n};
+% %             cfg.noisecov = NCV;
+% %             data{i,n} = ft_connectivitysimulation(cfg);
+% %             disp([dataLen i n])
+% %         end
+% %     end
+% %     mkdir([cd '\benchmark'])
+% %     save([cd '\benchmark\simdata_9A_' num2str(dataLen)],'data')
+% % end
 
 % Now test for recovery with dFC metrics
 for dataLen = 1:size(NCvec,2)
-    load([cd '\benchmark\simdata_9A_' num2str(dataLen)],'data')
+%     load([cd '\benchmark\simdata_9A_' num2str(dataLen)],'data')
     bstrap = 0;
     for i = 1:ncons
         load([cd '\benchmark\9A_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
@@ -52,40 +53,40 @@ for dataLen = 1:size(NCvec,2)
             [Hz granger grangerft] = computeGranger(freq,cmap(2,:),3,0,'--',1,bstrap);
             [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(dataN,1,(NCvec(dataLen)),1,bstrap);
             %             plotNPD(Hz,npdspctrm,dataN,cmap(3,:),0,':',0)
-%             if bstrap == 1
-%                 NPG_ci{dataLen}= granger{2,2};
-%                 NPD_ci{dataLen} = npdspctrm{2,2};
-%                 bstrap = 0;
-%                 save([cd '\benchmark\9A_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
-%             else
-%                 load([cd '\benchmark\9A_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
-%             end
+            if bstrap == 1
+                NPG_ci{dataLen}= granger{2,2};
+                NPD_ci{dataLen} = npdspctrm{2,2};
+                bstrap = 0;
+                save([cd '\benchmark\9A_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
+            else
+                load([cd '\benchmark\9A_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
+            end
             
             % Now estimate
             NPG = granger{1,2};
             A = squeeze(sum((NPG>NPG_ci{dataLen}),3));
             crit = ceil(size(NPG,3).*0.1);
-            Ac = A>crit;
-            SA = Ac+Z;
-            NPGScore(dataLen,i,n) = 100.*(sum(SA(:)== 2 | SA(:)== 0) - size(diag(Ac),1))./(numel(Ac) - size(diag(Ac),1));
+            A = A>crit;
+            SA = A+Z;
+            NPGScore(dataLen,i,n) = 100.*(sum(SA(:)== 2 | SA(:)== 0) - size(diag(A),1))./(numel(A) - size(diag(A),1));
             
             NPD = npdspctrm{1,2};
             B = squeeze(sum((NPD>NPD_ci{dataLen}),3));
             crit = ceil(size(NPD,3).*0.1);
-            Bc = B>crit;
-            SB = Bc+Z;
-            NPDScore(dataLen,i,n) = 100.*(sum(SB(:)== 2 | SB(:)== 0) - size(diag(Bc),1))./(numel(Bc) - size(diag(Bc),1));
+            B = B>crit;
+            SB = B+Z;
+            NPDScore(dataLen,i,n) = 100.*(sum(SB(:)== 2 | SB(:)== 0) - size(diag(B),1))./(numel(B) - size(diag(B),1));
             %             NPDScore(dataLen,i,n) = sum((B(:)-Z(:)).^2);
             disp([n i dataLen])
         end
     end
 end
-% 
-save([cd '\benchmark\9ABenchMarks'],'NPDScore','NPGScore','NCvec','DA')
 
-load([cd '\benchmark\9ABenchMarks'],'NPDScore','NPGScore','NCvec','DA')
+save([cd '\benchmark\9ABenchMarks'],'NPGScore','NPGScore','NCvec','DA')
+
+load([cd '\benchmark\9ABenchMarks'],'NPGScore','NPGScore','NCvec','DA')
 subplot(1,2,2)
-a = plot(NCvec,mean(NPGScore,3));
+a = plot(NCvec,1-mean(NPGScore,3));
 rcmap = brewermap(6,'Reds');
 markstylz = {'^','o','s','d'};
 for i = 1:ncons
@@ -99,9 +100,9 @@ grid on
 xlabel('Trial Length (2^n)')
 ylabel('Estimation Accuracy')
 title('Effects of Trial Length on Connection Recovery with mvNPG')
-ylim([0 100])
+ylim([-3 1.25])
 subplot(1,2,1)
-b = plot(NCvec,mean(NPDScore,3));
+b = plot(NCvec,1-mean(NPDScore,3));
 bcmap = brewermap(6,'Blues');
 for i = 1:ncons
     b(i).Color = bcmap(2+i,:);
@@ -115,5 +116,5 @@ grid on
 xlabel('Trial Length (2^n)')
 ylabel('Estimation Accuracy')
 title('Effects of Trial Length on Connection Recovery with NPD')
+ylim([-3 1.25])
 set(gcf,'Position',[353         512         1120         446])
-ylim([0 100])

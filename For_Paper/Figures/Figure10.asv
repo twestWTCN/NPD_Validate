@@ -2,46 +2,74 @@ close all; clear
 addpath('C:\Users\Tim\Documents\Work\GIT\BrewerMap')
 cmap = linspecer(4);
 
-%% Simulation 9A - Data Length with Fixed Data Length (25s)
+%% Simulation 10 - Combining ASNR and SigMix
 rng(927693)
 ncons = 4;
-nreps = 20;
+nreps = 10;
 [CMat,NCV] = makeRndGraphs(ncons,nreps);
-NCvec = linspace(5,11,12);
-DA = 25; % Total data availability (100s)
+
+NC = 5;
+% ASNR 
+SNRvec(1,NC) = logspace(log10(1000),log10(0.01),floor(NC/2));
+SNRvec(2,NC) = logspace(log10(1000),log10(0.01),floor(NC/2));
+
+% SigMix
+SigMixvec = linspace(0,2,NC);
 
 % Nsamps = 150;
 
 % Simulate data
 
-for dataLen = 1:size(NCvec,2)
+for SNR = 1:size(SNRvec,2)
     clear data
-    rng(7865734)
-    for i = 1:ncons
+    for SMx = 1:size(SigMixvec,2)
         for n = 1:nreps
             % Simulate Data
             cfg             = [];
             cfg.fsample     = 200;
-            cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
-            cfg.ntrials     = ceil(DA./cfg.triallength);
+            cfg.triallength = 500;
+            cfg.ntrials     = 1;
             cfg.nsignal     = 3;
             cfg.method      = 'ar';
-            cfg.params = CMat{i,n};
+            cfg.params = CMat{2,n};
             cfg.noisecov = NCV;
-            data{i,n} = ft_connectivitysimulation(cfg);
-            disp([dataLen i n])
+            data_raw = ft_connectivitysimulation(cfg);
+            
+            % Do the Signal Mixing
+            data = data_raw;
+            sigmix = repmat(SigMixvec(SMx)/(Nsig-1),Nsig,Nsig).*~eye(Nsig);
+            sigmix = sigmix+eye(Nsig).*1; %(1-NCvec(ncov));
+            data.trial{1} = (data.trial{1} -mean(data.trial{1},2))./std(data.trial{1},[],2);
+            data.trial{1} = sigmix*data.trial{1};
+            
+            % NowDo the ASNR
+            randproc = randn(size(data.trial{1}));
+            for i = 1:size(randproc,1)
+                s = data.trial{1}(i,:);
+                s = (s-mean(s))./std(s);
+                n  =((SNRvec(i,SNR)*1).*randproc(i,:));
+                y = s+n;
+                snr = var(s)/var(n);
+                disp(snr)
+                snrbank(ncov,i) = snr;
+                %         y = (y-mean(y))./std(y);
+                data.trial{1}(i,:) = y;
+            end
+            
+             dataBank{SNR,SMx,n} = data;
+            disp([SNR Smx n])
         end
     end
     mkdir([cd '\benchmark'])
-    save([cd '\benchmark\simdata_9A_' num2str(dataLen)],'data')
+    save([cd '\benchmark\simdata_10_' num2str(dataLen)],'data')
 end
 
 % Now test for recovery with dFC metrics
-for dataLen = 1:size(NCvec,2)
-    load([cd '\benchmark\simdata_9A_' num2str(dataLen)],'data')
-    bstrap = 0;
-    for i = 1:ncons
+for SNR = 1:size(SNRvec,2)
+    clear data
+    for SMx = 1:SigMixvec
         for n = 1:nreps
+            
             TrueCMat = CMat{i,n};
             Z = sum(TrueCMat,3);
             Z(Z==0.5) = 0;

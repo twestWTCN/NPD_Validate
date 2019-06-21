@@ -2,63 +2,95 @@ close all; clear
 addpath('C:\Users\Tim\Documents\Work\GIT\BrewerMap')
 cmap = linspecer(4);
 
-%% Simulation 9A - Data Length with Fixed Data Length (25s)
-rng(927693)
+%% Simulation 10 - Combining ASNR and SigMix
+rng(946022)
 ncons = 4;
-nreps = 20;
-[CMat,NCV] = makeRndGraphs(ncons,nreps);
-NCvec = linspace(5,11,12);
-DA = 25; % Total data availability (100s)
+nreps = 10;
+Nsig = 3;
+[CMat,NCV] = makeRndGraphs(ncons,nreps,Nsig);
+
+NC = 5;
+% ASNR 
+SNRvec(1,:) = logspace(log10(0.01),log10(1000),NC);
+SNRvec(2,:) = ones(1,NC);
+SNRvec(3,:) = ones(1,NC);
+
+% SigMix
+SigMixvec = linspace(0,2,NC);
 
 % Nsamps = 150;
 
 % Simulate data
 
-for dataLen = 1:size(NCvec,2)
+for SNR = 1:size(SNRvec,2)
     clear data
-    rng(7865734)
-    for i = 1:ncons
-        for n = 1:nreps
+    for SMx = 1:size(SigMixvec,2)
+        parfor n = 1:nreps
             % Simulate Data
             cfg             = [];
             cfg.fsample     = 200;
-            cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
-            cfg.ntrials     = ceil(DA./cfg.triallength);
+            cfg.triallength = 500;
+            cfg.ntrials     = 1;
             cfg.nsignal     = 3;
             cfg.method      = 'ar';
-            cfg.params = CMat{i,n};
+            cfg.params = CMat{2,n}; %selected two connections here!
             cfg.noisecov = NCV;
-            data{i,n} = ft_connectivitysimulation(cfg);
-            disp([dataLen i n])
+            data_raw = ft_connectivitysimulation(cfg);
+            
+            % Do the Signal Mixing
+            data = data_raw;
+            sigmix = repmat(SigMixvec(SMx)/(Nsig-1),Nsig,Nsig).*~eye(Nsig);
+            sigmix = sigmix+eye(Nsig).*1; %(1-NCvec(ncov));
+            data.trial{1} = (data.trial{1} -mean(data.trial{1},2))./std(data.trial{1},[],2);
+            data.trial{1} = sigmix*data.trial{1};
+            
+            % NowDo the ASNR
+            randproc = randn(size(data.trial{1}));
+            for i = 1:size(randproc,1)
+                s = data.trial{1}(i,:);
+                s = (s-mean(s))./std(s);
+                nr  =((SNRvec(i,SNR)*1).*randproc(i,:));
+                y = s+nr;
+                snr = var(s)/var(nr);
+                disp(snr)
+%                 snrbank(SMx,n,i) = snr;
+                %         y = (y-mean(y))./std(y);
+                data.trial{1}(i,:) = y;
+            end
+            
+             dataBank{SNR,SMx,n} = data;
+            disp([SNR SMx n])
         end
     end
     mkdir([cd '\benchmark'])
-    save([cd '\benchmark\simdata_9A_' num2str(dataLen)],'data')
+    save([cd '\benchmark\simdata_10'],'dataBank')
 end
 
 % Now test for recovery with dFC metrics
-for dataLen = 1:size(NCvec,2)
-    load([cd '\benchmark\simdata_9A_' num2str(dataLen)],'data')
-    bstrap = 0;
-    for i = 1:ncons
+    load([cd '\benchmark\simdata_10'],'dataBank')
+
+for SNR = 1:size(SNRvec,2)
+    for SMx = 1:size(SigMixvec,2)
+        bstrap = 1;
         for n = 1:nreps
-            TrueCMat = CMat{i,n};
+            
+            TrueCMat = CMat{2,n};
             Z = sum(TrueCMat,3);
             Z(Z==0.5) = 0;
             Z(Z==0.3) = 1;
             
-            dataN = data{i,n};
-            freq = computeSpectra(dataN,[0 0 0],3,0,'-',-1,dataN.cfg.triallength);
+            dataN = dataBank{SNR,SMx,n};
+            freq = computeSpectra(dataN,[0 0 0],3,0,'-',-1,1);
             [Hz granger grangerft] = computeGranger(freq,cmap(2,:),3,0,'--',1,bstrap);
-            [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(dataN,1,(NCvec(dataLen)),1,bstrap);
+            [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(dataN,1,8,1,bstrap);
             plotNPD(Hz,npdspctrm,dataN,cmap(3,:),0,':',0)
             if bstrap == 1
-                NPG_ci{dataLen}= granger{2,2};
-                NPD_ci{dataLen} = npdspctrm{2,2};
+                NPG_ci{SNR,SMx}= granger{2,2};
+                NPD_ci{SNR,SMx} = npdspctrm{2,2};
                 bstrap = 0;
-                save([cd '\benchmark\9A_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
+                save([cd '\benchmark\10_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
             else
-                load([cd '\benchmark\9A_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
+                load([cd '\benchmark\10_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
             end
             
             % Now estimate
@@ -77,9 +109,9 @@ for dataLen = 1:size(NCvec,2)
     end
 end
 
-save([cd '\benchmark\9ABenchMarks'],'NPGScore','NPGScore','NCvec','DA')
+save([cd '\benchmark\10BenchMarks'],'NPGScore','NPGScore','NCvec','DA')
 
-load([cd '\benchmark\9ABenchMarks'],'NPGScore','NPGScore','NCvec','DA')
+load([cd '\benchmark\10BenchMarks'],'NPGScore','NPGScore','NCvec','DA')
 subplot(1,2,2)
 a = plot(NCvec,1-mean(NPGScore,3));
 rcmap = brewermap(6,'Reds');

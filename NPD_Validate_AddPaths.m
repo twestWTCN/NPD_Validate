@@ -6,7 +6,7 @@ if strmatch(getenv('computername'),'FREE')
     preFix_Git = 'C:\Users\timot\Documents\GitHub\';
 elseif strmatch(getenv('computername'),'SFLAP-2')
     spmpath = 'C:\Users\Tim\Documents\spm12';
-    preFix_MLAD = 'C:\Users\Tim\Documents\MATLAB_ADDONS';
+    preFix_MLAD = 'C:\Users\Tim\Documents\MATLAB_ADDONS\';
     preFix_Git = 'C:\Users\Tim\Documents\Work\GIT\';
     
     

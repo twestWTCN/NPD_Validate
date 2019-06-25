@@ -66,21 +66,19 @@ for dataLen = 1:size(NCvec,2)
             A = squeeze(sum((NPG>NPG_ci{dataLen}),3));
             crit = ceil(size(NPG,3).*0.1);
             Ac = A>crit;
-            SA = Ac+Z;
-            NPGScore(dataLen,i,n) = 100.*(sum(SA(:)== 2 | SA(:)== 0) - size(diag(Ac),1))./(numel(Ac) - size(diag(Ac),1));
+            NPGScore(dataLen,i,n) = matrixScore(Ac,Z);
             
             NPD = npdspctrm{1,2};
             B = squeeze(sum((NPD>NPD_ci{dataLen}),3));
             crit = ceil(size(NPD,3).*0.1);
             Bc = B>crit;
-            SB = Bc+Z;
-            NPDScore(dataLen,i,n) = 100.*(sum(SB(:)== 2 | SB(:)== 0) - size(diag(Bc),1))./(numel(Bc) - size(diag(Bc),1));
+            NPDScore(dataLen,i,n) = matrixScore(Bc,Z);1--
             %             NPDScore(dataLen,i,n) = sum((B(:)-Z(:)).^2);
             disp([n i dataLen])
         end
     end
 end
-% 
+% 2
 save([cd '\benchmark\9ABenchMarks'],'NPDScore','NPGScore','NCvec','DA')
 
 load([cd '\benchmark\9ABenchMarks'],'NPDScore','NPGScore','NCvec','DA')

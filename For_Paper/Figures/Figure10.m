@@ -11,10 +11,10 @@ Nsig = 3;
 
 NC = 20;
 % ASNR
-SNRvec(1,:) = logspace(log10(0.001),log10(100),NC);
-SNRvec(2,:) = zeros(1,NC);
-SNRvec(3,:) = zeros(1,NC);
-
+SNRvec(1,:) = logspace(log10(0.01),log10(100),NC);
+SNRvec(2,:) = repmat(log10(0.01),1,NC);
+SNRvec(3,:) = repmat(log10(0.01),1,NC);
+SNRvec = sqrt(SNRvec);
 % SigMix
 SigMixvec = linspace(0,1,NC);
 
@@ -117,13 +117,30 @@ save([cd '\benchmark\10BenchMarks'],'NPGScore','NPDScore','SNRvec','SigMixvec')
 load([cd '\benchmark\10BenchMarks'],'NPGScore','NPDScore','SNRvec','SigMixvec')
 
 subplot(1,2,1);
-imagesc(log(SNRvec(1,:)),SigMixvec,mean(NPGScore,3));
-set(gca,'YDir','normal');
-title('NPG'); clim
-xlabel('SNR'); ylabel('Mixing')
+[cma1,b1,cf] = contourf(log(SNRvec(1,:)),SigMixvec,mean(NPGScore,3),0:10:100);
+clabel(cma1,b1)
+title('NPG'); caxis([0 100])
+xlabel('ASNR'); ylabel('Mixing (% Shared Variance)')
+cmap = brewermap(10,'RdBu');
+colormap(cmap)
 
 subplot(1,2,2);
-imagesc(log(SNRvec(1,:)),SigMixvec,mean(NPDScore,3));
-set(gca,'YDir','normal');
-title('NPD');
-xlabel('SNR'); ylabel('Mixing')
+[cma2,b2,cf] = contourf(log(SNRvec(1,:)),SigMixvec,mean(NPDScore,3),0:10:100);
+clabel(cma2,b2)
+title('NPD'); caxis([0 100])
+xlabel('ASNR'); ylabel('Mixing')
+cmap = brewermap(10,'RdBu');
+colormap(cmap)
+
+
+
+Bc = [0 0 1;
+      0 0 0;
+      0 0 0];
+Z  = [0 0 1;
+      1 0 0;
+      1 1 1];
+  
+ matrixScore(Bc,Z)  
+
+

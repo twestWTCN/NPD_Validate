@@ -8,7 +8,10 @@ elseif strmatch(getenv('computername'),'SFLAP-2')
     spmpath = 'C:\Users\Tim\Documents\spm12';
     preFix_MLAD = 'C:\Users\Tim\Documents\MATLAB_ADDONS\';
     preFix_Git = 'C:\Users\Tim\Documents\Work\GIT\';
-    
+elseif strmatch(getenv('computername'),'DESKTOP-94CEG1L-2')
+    spmpath = 'C:\Users\timot\Documents\GitHub\spm12';
+    preFix_MLAD = 'C:\Users\timot\Documents\Work\MATLAB ADDONS\';
+    preFix_Git = 'C:\Users\timot\Documents\GitHub\';
     
 end
 addpath([preFix_MLAD 'linspecer'])

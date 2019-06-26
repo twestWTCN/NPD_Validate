@@ -73,7 +73,6 @@ for SNR = 1:size(SNRvec,2)
     for SMx = 1:size(SigMixvec,2)
         bstrap = 0;
         load([cd '\benchmark\10_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
-        load([cd '\benchmark\simdata_10_' sprintf('%.0f_%.0f',[SNR,SMx])],'dataBank')
         parfor n = 1:nreps
             
             TrueCMat = CMat{2,n};
@@ -85,7 +84,7 @@ for SNR = 1:size(SNRvec,2)
             freq = computeSpectra(dataN,[0 0 0],3,0,'-',-1,(2^9)/dataN.fsample);
             [Hz granger grangerft] = computeGranger(freq,cmap(2,:),3,0,'--',1,bstrap);
             [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(dataN,1,9,1,bstrap);
-%             plotNPD(Hz,npdspctrm,dataN,cmap(3,:),1,':',1)
+            plotNPD(Hz,npdspctrm,dataN,cmap(3,:),1,':',1)
             %             if bstrap == 1
             %                 NPG_ci{SNR,SMx}= granger{2,2};
             %                 NPD_ci{SNR,SMx} = npdspctrm{2,2};
@@ -97,13 +96,13 @@ for SNR = 1:size(SNRvec,2)
             
             % Now estimate
             NPG = granger{1,2};
-            A = squeeze(sum((NPG>NPG_ci{4,4}),3));
+            A = squeeze(sum((NPG>NPG_ci{8,8}),3));
             crit = ceil(size(NPG,3).*0.3);
             Ac = A>crit;
             NPGScore(SNR,SMx,n) = matrixScore(Ac,Z);
             
             NPD = npdspctrm{1,2};
-            B = squeeze(sum((NPD>NPD_ci{4,4}),3));
+            B = squeeze(sum((NPD>NPD_ci{8,8}),3));
             crit = ceil(size(NPD,3).*0.3);
             Bc = B>crit;
             NPDScore(SNR,SMx,n) = matrixScore(Bc,Z);
@@ -114,12 +113,13 @@ for SNR = 1:size(SNRvec,2)
 end
 
 save([cd '\benchmark\10BenchMarks'],'NPGScore','NPDScore','SNRvec','SigMixvec')
+
 load([cd '\benchmark\10BenchMarks'],'NPGScore','NPDScore','SNRvec','SigMixvec')
 
 subplot(1,2,1);
 imagesc(log(SNRvec(1,:)),SigMixvec,mean(NPGScore,3));
 set(gca,'YDir','normal');
-title('NPG'); clim
+title('NPG');
 xlabel('SNR'); ylabel('Mixing')
 
 subplot(1,2,2);

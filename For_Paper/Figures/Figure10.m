@@ -132,15 +132,15 @@ xlabel('ASNR'); ylabel('Mixing')
 cmap = brewermap(10,'RdBu');
 colormap(cmap)
 
+set(gcf,'Position',[404         577        1109         419])
 
-
-Bc = [0 0 1;
-      0 0 0;
-      0 0 0];
-Z  = [0 0 1;
-      1 0 0;
-      1 1 1];
-  
- matrixScore(Bc,Z)  
-
-
+% Bc = [0 0 1;
+%       0 0 0;
+%       0 0 0];
+% Z  = [0 0 1;
+%       1 0 0;
+%       1 1 1];
+%   
+%  matrixScore(Bc,Z)  
+% 
+% 

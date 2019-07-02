@@ -10,7 +10,7 @@ A(:,:,2) = -A(:,:,1);
 % noise covarianc matrix
 NCV     = eye(sz).*0.3;
 
-cstrength = [0.6 0.501 0.4 0.3];
+cstrength = [0.3 0.3 0.3 0.3];
 for i = 1:nc
     for n = 1:nreps
         csel = randsample(1:size(clist,2),i);

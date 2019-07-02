@@ -1,4 +1,4 @@
-function [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv npdcrcvZ npdcrcvW] = computeNPDQ(data,frstord,npdord,sclr,bstrap)
+function [Hz lags npdspctrm npdspctrmZ npdspctrmW npdspctrmQ nscohspctrm npdcrcv npdcrcvZ npdcrcvW npdcrcvQ] = computeNPDQ(data,frstord,npdord,sclr,bstrap)
 if nargin<3
     npdord = 8;
 end
@@ -21,7 +21,7 @@ for i = 1:length(data.label)
             %                 z2= [z2 data.trial{p}(sndord,:)];
         end
         fsamp = data.fsample;
-        [f13 t13 f13Z t13Z f13W t13W ci13 ci13Z ci13W] = NPD_XYZW(x,y,z,w,fsamp,npdord,bstrap);
+        [f13 t13 f13Z t13Z f13W t13W ci13 ci13Z ci13W] = NPD_XYZWQ(x,y,z,w,fsamp,npdord,bstrap);
 %         [f13 t13 f13Z t13Z f13W t13W f13Q t13Q ci13 ci13Z ci13W ci13Q] = NPD_XYZWQ(x,y,z,w,q,fsamp,npdord,bstrap);
         npdspctrm{1,1}(i,j,:) = sclr*f13(:,10);
         npdspctrm{1,2}(i,j,:) = sclr*f13(:,12); % Backward (j -> i)
@@ -53,12 +53,15 @@ for i = 1:length(data.label)
         npdspctrmW{2,2}(i,j,:) = sclr*ci13W(:,12);
         npdspctrmW{2,3}(i,j,:) = sclr*ci13W(:,11);        
    
-%         npdspctrmQ{1,1}(i,j,:) = sclr*f13Q(:,10);
-%         npdspctrmQ{1,2}(i,j,:) = sclr*f13Q(:,12); % Backward
-%         npdspctrmQ{1,3}(i,j,:) = sclr*f13Q(:,11); % Forward
-%         npdcrcvQ(i,j,:) = t13Q(:,3);
-%            
-%         
+        npdspctrmQ{1,1}(i,j,:) = sclr*f13Q(:,10);
+        npdspctrmQ{1,2}(i,j,:) = sclr*f13Q(:,12); % Backward
+        npdspctrmQ{1,3}(i,j,:) = sclr*f13Q(:,11); % Forward
+        npdcrcvQ(i,j,:) = t13Q(:,3);
+        
+        npdspctrmW{2,1}(i,j,:) = sclr*ci13W(:,10);
+        npdspctrmW{2,2}(i,j,:) = sclr*ci13W(:,12);
+        npdspctrmW{2,3}(i,j,:) = sclr*ci13W(:,11);        
+        
         
     end
 end

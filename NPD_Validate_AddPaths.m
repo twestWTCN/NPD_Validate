@@ -1,9 +1,9 @@
 function NPD_Validate_AddPaths()
 if strmatch(getenv('computername'),'FREE')
     
-    spmpath = 'C:\Users\timot\Documents\GitHub\spm12';
-    preFix_MLAD = 'C:\Users\timot\Documents\Work\MATLAB ADDONS\';
-    preFix_Git = 'C:\Users\timot\Documents\GitHub\';
+    spmpath = 'C:\spm12';
+    preFix_MLAD = 'C:\Users\twest\Documents\Work\MATLAB ADDONS\';
+    preFix_Git = 'C:\Users\twest\Documents\Work\GitHub\';
 elseif strmatch(getenv('computername'),'SFLAP-2')
     spmpath = 'C:\Users\Tim\Documents\spm12';
     preFix_MLAD = 'C:\Users\Tim\Documents\MATLAB_ADDONS\';

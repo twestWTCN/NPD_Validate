@@ -24,49 +24,49 @@ SigMixvec = linspace(0,1,NC);
 
 % % Simulate data
 
-% for SNR = 1:size(SNRvec,2)
-%     for SMx = 1:size(SigMixvec,2)
-%     clear dataBank data
-%         parfor n = 1:nreps
-%             % Simulate Data
-%             cfg             = [];
-%             cfg.fsample     = 200;
-%             cfg.triallength = 100;
-%             cfg.ntrials     = 1;
-%             cfg.nsignal     = 3;
-%             cfg.method      = 'ar';
-%             cfg.params = CMat{Ncon,n}; %selected Ncon connections here!
-%             cfg.noisecov = NCV;
-%             data_raw = ft_connectivitysimulation(cfg);
-% 
-%             % Do the Signal Mixing
-%             data = data_raw;
-%             sigmix = repmat(SigMixvec(SMx)/(Nsig-1),Nsig,Nsig).*~eye(Nsig);
-%             sigmix = sigmix+eye(Nsig).*1; %(1-NCvec(ncov));
-%             data.trial{1} = (data.trial{1} -mean(data.trial{1},2))./std(data.trial{1},[],2);
-%             data.trial{1} = sigmix*data.trial{1};
-% 
-%             % NowDo the ASNR
-%             randproc = randn(size(data.trial{1}));
-%             for i = 1:size(randproc,1)
-%                 s = data.trial{1}(i,:);
-%                 s = (s-mean(s))./std(s);
-%                 nr  =((SNRvec(i,SNR)*1).*randproc(i,:));
-%                 y = s+nr;
-%                 snr = var(s)/var(nr);
-%                 disp(snr)
-%                 %                 snrbank(SMx,n,i) = snr;
-%                 %         y = (y-mean(y))./std(y);
-%                 data.trial{1}(i,:) = y;
-%             end
-%             dataBank{n} = data;
-%             %              dataBank{SNR,SMx,n} = data;
-%             disp([SNR SMx n])
-%         end
-%     mkdir([cd '\benchmark'])
-%     save([cd '\benchmark\simdata_10_' sprintf('%.0f_%.0f_%.0f',[SNR,SMx,Ncon])],'dataBank')
-%     end
-% end
+for SNR = 1:size(SNRvec,2)
+    for SMx = 1:size(SigMixvec,2)
+    clear dataBank data
+        parfor n = 1:nreps
+            % Simulate Data
+            cfg             = [];
+            cfg.fsample     = 200;
+            cfg.triallength = 100;
+            cfg.ntrials     = 1;
+            cfg.nsignal     = 3;
+            cfg.method      = 'ar';
+            cfg.params = CMat{Ncon,n}; %selected Ncon connections here!
+            cfg.noisecov = NCV;
+            data_raw = ft_connectivitysimulation(cfg);
+
+            % Do the Signal Mixing
+            data = data_raw;
+            sigmix = repmat(SigMixvec(SMx)/(Nsig-1),Nsig,Nsig).*~eye(Nsig);
+            sigmix = sigmix+eye(Nsig).*1; %(1-NCvec(ncov));
+            data.trial{1} = (data.trial{1} -mean(data.trial{1},2))./std(data.trial{1},[],2);
+            data.trial{1} = sigmix*data.trial{1};
+
+            % NowDo the ASNR
+            randproc = randn(size(data.trial{1}));
+            for i = 1:size(randproc,1)
+                s = data.trial{1}(i,:);
+                s = (s-mean(s))./std(s);
+                nr  =((SNRvec(i,SNR)*1).*randproc(i,:));
+                y = s+nr;
+                snr = var(s)/var(nr);
+                disp(snr)
+                %                 snrbank(SMx,n,i) = snr;
+                %         y = (y-mean(y))./std(y);
+                data.trial{1}(i,:) = y;
+            end
+            dataBank{n} = data;
+            %              dataBank{SNR,SMx,n} = data;
+            disp([SNR SMx n])
+        end
+    mkdir([cd '\benchmark'])
+    save([cd '\benchmark\simdata_10_' sprintf('%.0f_%.0f_%.0f',[SNR,SMx,Ncon])],'dataBank')
+    end
+end
 
 % Now test for recovery with dFC metrics
 % load([cd '\benchmark\10_NPG_CI_NPD_CI_' num2str(Ncon)],'NPG_ci','NPD_ci')
@@ -78,7 +78,7 @@ for SNR = 1:size(SNRvec,2)
         load([cd '\benchmark\simdata_10_' sprintf('%.0f_%.0f_%.0f',[SNR,SMx,Ncon])],'dataBank')
         parfor n = 1:nreps
             
-            TrueCMat = CMat{2,n};
+            TrueCMat = CMat{Ncon,n};
             Z = sum(TrueCMat,3);
             Z(Z==0.5) = 0;
             Z(Z~=0) = 1;
@@ -98,23 +98,23 @@ for SNR = 1:size(SNRvec,2)
             %             end
             %
             % Now estimate
-            NPG = granger{1,3};
+            NPG = granger{1,2};
             A = squeeze(sum((abs(NPG)>0.05),3));
             crit = ceil(size(NPG,3).*0.15);
             Ac = A>crit;
             NPGScore(SNR,SMx,n) = matrixScore(Ac,Z);
             
-            NPD = npdspctrm{1,3};
+            NPD = npdspctrm{1,2};
             B = squeeze(sum((NPD>0.05),3));
             crit = ceil(size(NPD,3).*0.15);
             Bc = B>crit;
             
-            NPD_z = npdspctrmZ{1,3};
+            NPD_z = npdspctrmZ{1,2};
             B = squeeze(sum((NPD_z>0.05),3));
             crit = ceil(size(NPD_z,3).*0.15);
             Bc_z = B>crit;
             
-            NPD_w = npdspctrmW{1,3};
+            NPD_w = npdspctrmW{1,2};
             B = squeeze(sum((NPD_w>0.05),3));
             crit = ceil(size(NPD_w,3).*0.15);
             Bc_w = B>crit;

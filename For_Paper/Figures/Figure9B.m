@@ -3,9 +3,9 @@ addpath('C:\Users\Tim\Documents\Work\GIT\BrewerMap')
 cmap = linspecer(4);
 
 %% Simulation 9B - Data Length with Fixed Number of Trials (n=50)
-rng(927693)
+rng(42342)
 ncons = 4;
-nreps = 25; %25
+nreps = 20; %25
 sz = 3;
 [CMat,NCV] = makeRndGraphs(ncons,nreps,sz);
 NCvec = linspace(3,12,12); %12
@@ -15,14 +15,14 @@ NCvec = linspace(3,12,12); %12
 
 for dataLen = 1:size(NCvec,2)
     clear data
-    rng(645634)
+    rng(63487)
     for i = 1:ncons
         for n = 1:nreps
-            % Simulate Data
+%             Simulate Data
             cfg             = [];
             cfg.fsample     = 200;
             cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
-            cfg.ntrials     = 35;
+            cfg.ntrials     = 50;
             cfg.nsignal     = 3;
             cfg.method      = 'ar';
             cfg.params = CMat{i,n};
@@ -64,13 +64,13 @@ for dataLen = 1:numel(NCvec)
             % Now estimate
             NPG = granger{1,2};
             A = squeeze(sum((NPG>NPG_ci{dataLen}),3));
-            crit = ceil(size(NPG,3).*0.2);
+            crit = ceil(size(NPG,3).*0.1);
             Ac = A>crit;
             NPGScore(dataLen,i,n) = matrixScore(Ac,Z);
             
             NPD = npdspctrm{1,2};
             B = squeeze(sum((NPD>NPD_ci{dataLen}),3));
-            crit = ceil(size(NPD,3).*0.2);
+            crit = ceil(size(NPD,3).*0.1);
             Bc = B>crit;
             NPDScore(dataLen,i,n) = matrixScore(Bc,Z);
             disp([n i dataLen])
@@ -99,6 +99,7 @@ ylabel('Estimation Accuracy')
 title('Effects of Trial Length on Connection Recovery with mvNPG')
 % ylim([-3 1.25])
 subplot(1,2,1)
+
 b = plot(NCvec,mean(NPDScore,3));
 bcmap = brewermap(6,'Blues');
 for i = 1:ncons

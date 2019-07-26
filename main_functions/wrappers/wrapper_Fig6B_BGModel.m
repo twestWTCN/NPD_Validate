@@ -63,7 +63,7 @@ for ncov = 1:NC
     [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv npdcrcvZ npdcrcvW] = computeNPD(data,1,8,1,bstrp);
     coh.freq= Hz; coh.cohspctrm = nscohspctrm{1}; coh.ci = nscohspctrm{2};
     % NS Coh
-%     computeNSCoherence(coh,cmapn(1,:),Nsig,plotfig,linestyle)
+   computeNSCoherence(coh,cmapn(1,:),Nsig,plotfig,linestyle)
     %     plotNPD_zero(Hz,npdspctrm,data,cmap(1,:),plotfig,linestyle)
     % NPD
     plotNPD(Hz,npdspctrm,data,cmapn(3,:),plotfig,linestyle,bstrp)

@@ -1,9 +1,9 @@
 function [] = wrapper_Fig3_AsymSNR(C,NCV,NC)
 % Asymetric SNRs
 % NCvec = linspace(0,2,NC);
-NCvec = [0.01  1      10
-         0.01  0.01   0.01
-         0.01  0.01   0.01];
+NCvec = [0.2  1      10
+         0.2  0.2   0.2
+         0.1  0.1   0.1];
 NCvec = sqrt(NCvec);
 nc_col_sc = [1 0.9 0.8];
 for i = 1:NC
@@ -41,10 +41,16 @@ for ncov = 1:NC
         s = data.trial{1}(i,:);
         s = (s-mean(s))./std(s);
         n = ((NCvec(i,ncov)*1).*randproc(i,:));
+        %         si = filter(bfilt,afilt,s);
+        %         ni = filter(bfilt,afilt,n);
         y = s + n;
         snr = var(s)/var(n);
         snrbank(ncov,i) = snr;
+        %         snrbp = var(si)/var(ni);
+        snrbp = computeBandLimSNR(s,n,[45 55],data);
+        snrbpbank(ncov,i) = snrbp;
         data.trial{1}(i,:) = y;
+
     end
     %% Plot Example Trace
     figure(1)
@@ -76,7 +82,7 @@ for ncov = 1:NC
     % NPDx1
     %     plotNPD(Hz,npdspctrmZ,data,cmapn(4,:),plotfig,linestyle)
     %     plotNPD(Hz,npdspctrmW,data,cmap(4,:),plotfig,linestyle)
-    plotDiffNPD(Hz,npdspctrm,data,cmapn(3,:),plotfig,linestyle,bstrp)
+    plotDiffNPD(Hz,npdspctrm,data,cmapn(3,:),plotfig,linestyle,1)
     %% GRANGER
     figure(2)
     computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle,0,bstrp)
@@ -87,11 +93,30 @@ for ncov = 1:NC
     a =1;
 end
 
-SNRDB = 10*log10(snrbank(:,1));
-SNRBASE = 10*log10(snrbank(:,2));
+SNRDB = 10*log10(snrbpbank(:,1));
+SNRBASE = 10*log10(snrbpbank(:,2));
 SRAT = SNRDB-SNRBASE;
 
 a= 1;
+
+
+% SNRBASE =
+% 
+%    13.1839
+%    13.4301
+%    13.2043
+% SNRDB =
+% 
+%    13.2253
+%     6.1606
+%    -3.8209
+% SRAT =
+% 
+%     0.0414
+%    -7.2695
+%   -17.0252
+% 
+
 % cfg = [];
 % cfg.viewmode = 'butterfly';  % you can also specify 'butterfly'
 % ft_databrowser(cfg, data);

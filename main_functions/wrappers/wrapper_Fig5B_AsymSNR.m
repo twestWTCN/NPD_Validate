@@ -1,7 +1,7 @@
 function [] = wrapper_Fig5B_AsymSNR(C,NCV,NC)
 
 % NCvec = linspace(0.01,50,NC);
-NCvec = repmat(0.001,2,NC);
+NCvec = repmat(0.01,2,NC);
 NCvec(1,1:floor(NC/2)) = logspace(log10(1000),log10(0.01),floor(NC/2));
 NCvec(2,ceil(NC/2)+1:end) = logspace(log10(0.01),log10(1000),floor(NC/2));
 NCvec = sqrt(NCvec); % convert to std
@@ -26,8 +26,8 @@ cfg.noisecov = NCV;
 X              = ft_connectivitysimulation(cfg);
 
 for ncov = 1:NC
-    if ncov == 1
-        bstrp = 0;
+    if ncov == floor(NC/2)
+        bstrp = 1;
     else
         bstrp = 0;
     end
@@ -41,14 +41,17 @@ for ncov = 1:NC
     %% Compute SNR
     randproc = randn(size(data.trial{1}));
     for i = 1:size(randproc,1)
-        s = data.trial{1}(i,:);
+        s = X.trial{1}(i,:);
         s = (s-mean(s))./std(s);
-        n  =((NCvec(i,ncov)*1).*randproc(i,:));
-        y = s+n;
+        n = ((NCvec(i,ncov)*1).*randproc(i,:));
+        %         si = filter(bfilt,afilt,s);
+        %         ni = filter(bfilt,afilt,n);
+        y = s + n;
         snr = var(s)/var(n);
-        disp(snr)
         snrbank(ncov,i) = snr;
-        %         y = (y-mean(y))./std(y);
+        %         snrbp = var(si)/var(ni);
+        snrbp = computeBandLimSNR(s,n,[45 55],data);
+        snrbpbank(ncov,i) = snrbp;
         data.trial{1}(i,:) = y;
     end
     
@@ -75,14 +78,14 @@ for ncov = 1:NC
     npGCci(ncov) = mean(granger{2,2}(1,2,:));
     
 end
-% save('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5B_CItab','npdCi','npGCci')
+save('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5B_CItab','npdCi','npGCci')
 load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5B_CItab','npdCi','npGCci')
 
 figure(2)
 % snrbank
 % scatter(NCvec,npPow,40,cmapn(1,:),'filled')
-SNRDB = 10*log10(snrbank(:,1));
-SNRBASE = 10*log10(snrbank(:,2));
+SNRDB = 10*log10(snrbpbank(:,1));
+SNRBASE = 10*log10(snrbpbank(:,2));
 A = SNRDB-SNRBASE;
 scatter(A,nscoh,50,cmapn(1,:),'Marker','+','LineWidth',3);
 

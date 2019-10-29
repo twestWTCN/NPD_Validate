@@ -1,5 +1,5 @@
 function [] = wrapper_Fig2_SymSNR(C,NCV,NC)
-
+[bfilt,afilt] = buildfilter();
 % NCvec = linspace(0,2,NC);
 NCvec = [0 0.75 3];
 NCvec = sqrt(NCvec); % variance
@@ -23,7 +23,7 @@ X              = ft_connectivitysimulation(cfg);
 
 for ncov = 1:NC
     if ncov ==1
-        bstrp = 1;
+        bstrp = 0; %1;
     else
         bstrp = 0;
     end
@@ -39,9 +39,14 @@ for ncov = 1:NC
         s = X.trial{1}(i,:);
         s = (s-mean(s))./std(s);
         n = ((NCvec(ncov)*1).*randproc(i,:));
+        %         si = filter(bfilt,afilt,s);
+        %         ni = filter(bfilt,afilt,n);
         y = s + n;
         snr = var(s)/var(n);
         snrbank(ncov,i) = snr;
+        %         snrbp = var(si)/var(ni);
+        snrbp = computeBandLimSNR(s,n,[45 55],data);
+        snrbpbank(ncov,i) = snrbp;
         data.trial{1}(i,:) = y;
     end
     %% Plot Example Trace
@@ -84,9 +89,20 @@ for ncov = 1:NC
     plotNPDXCorr(lags,npdcrcv,data,[0 0 0],plotfig,linestyle)
     a =1;
 end
-SNRDB = 10*log10(snrbank(:,1))
+SNRDB = 10*log10(snrbank(:,1));
+SNRBPDB = 10*log10(snrbpbank(:,1));
+
 a= 1;
 
+% SNRDB:
+%        Inf
+%     1.2280
+%    -4.7618
+
+% SNRBPDB:
+%        Inf
+%     5.0973
+%    -0.8948
 
 % cfg = [];
 % cfg.viewmode = 'butterfly';  % you can also specify 'butterfly'

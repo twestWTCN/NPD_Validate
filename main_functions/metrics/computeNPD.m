@@ -17,7 +17,7 @@ for i = 1:length(data.label)
             y = [y data.trial{p}(j,:)];
             z = [z data.trial{p}(frstord,:)];
             w = [w data.trial{p}(frstord+1,:)];
-            q = [w data.trial{p}(frstord+2,:)];
+%             q = [w data.trial{p}(frstord+2,:)];
             %                 z2= [z2 data.trial{p}(sndord,:)];
         end
         fsamp = data.fsample;

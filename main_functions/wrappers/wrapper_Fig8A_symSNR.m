@@ -22,13 +22,19 @@ for ncov = 1:NC
     %% Compute Signal Mixing
     randproc = randn(size(data.trial{1}));
     for i = 1:size(randproc,1)
-        s = data.trial{1}(i,:);
+        s = X.trial{1}(i,:);
         s = (s-mean(s))./std(s);
         n = ((NCvec(ncov)*1).*randproc(i,:));
+        %         si = filter(bfilt,afilt,s);
+        %         ni = filter(bfilt,afilt,n);
         y = s + n;
         snr = var(s)/var(n);
         snrbank(ncov,i) = snr;
+        %         snrbp = var(si)/var(ni);
+        snrbp = computeBandLimSNR(s,n,[14 31],data);
+        snrbpbank(ncov,i) = snrbp;
         data.trial{1}(i,:) = y;
+
     end
     
     %     if ncov == NC
@@ -83,6 +89,11 @@ for ncov = 1:NC
 end
 
 a = 1;
+% snrbpbank =
+% 
+%        Inf       Inf
+%     0.0713    0.2096
+%     0.0183    0.0538
 % cfg = [];
 % cfg.viewmode = 'butterfly';  % you can also specify 'butterfly'
 % ft_databrowser(cfg, data);

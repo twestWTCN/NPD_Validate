@@ -14,10 +14,10 @@ wrapper_Fig3_AsymSNR(C,NCV,3)
 
 figure(2)
 for i = 1:N^2
-subplot(N,N,i); ylim([-0.5 0.5])
+subplot(N,N,i); ylim([-0.25 0.25])
 end
-subplot(N,N,1); ylim([0 0.2])
-subplot(N,N,5); ylim([0 0.2])
-subplot(N,N,9); ylim([0 0.2])
+subplot(N,N,1); ylim([0 0.25])
+subplot(N,N,5); ylim([0 0.25])
+subplot(N,N,9); ylim([0 0.25])
 legend({'Power','NPD','Granger'})
 set(gcf,'Position',[1077         347         867         734])

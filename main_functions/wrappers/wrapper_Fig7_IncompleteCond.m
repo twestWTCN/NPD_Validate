@@ -35,13 +35,19 @@ for ncov = 1:NC
     data = X;
     randproc = randn(size(data.trial{1}));
     for i = 2
-        s = data.trial{1}(i,:);
+        s = X.trial{1}(i,:);
         s = (s-mean(s))./std(s);
         n = ((NCvec(ncov)*1).*randproc(i,:));
+        %         si = filter(bfilt,afilt,s);
+        %         ni = filter(bfilt,afilt,n);
         y = s + n;
         snr = var(s)/var(n);
         snrbank(ncov,i) = snr;
+        %         snrbp = var(si)/var(ni);
+        snrbp = computeBandLimSNR(s,n,[45 55],data);
+        snrbpbank(ncov,i) = snrbp;
         data.trial{1}(i,:) = y;
+
     end
     
     

@@ -22,8 +22,8 @@ X              = ft_connectivitysimulation(cfg);
 
 
 for ncov = 1:NC
-    if ncov == 1
-        bstrp = 0;
+    if ncov == floor(NC/2)
+        bstrp = 1;
     else
         bstrp = 0;
     end
@@ -37,12 +37,17 @@ for ncov = 1:NC
     %% Compute SNR
     randproc = randn(size(data.trial{1}));
     for i = 1:size(randproc,1)
-        s = data.trial{1}(i,:);
+        s = X.trial{1}(i,:);
         s = (s-mean(s))./std(s);
-        n = (ncv.*randproc(i,:));
+        n = ((NCvec(ncov)*1).*randproc(i,:));
+        %         si = filter(bfilt,afilt,s);
+        %         ni = filter(bfilt,afilt,n);
         y = s + n;
         snr = var(s)/var(n);
         snrbank(ncov,i) = snr;
+        %         snrbp = var(si)/var(ni);
+        snrbp = computeBandLimSNR(s,n,[45 55],data);
+        snrbpbank(ncov,i) = snrbp;
         data.trial{1}(i,:) = y;
     end
     
@@ -68,10 +73,11 @@ for ncov = 1:NC
     npGC(ncov) = max(granger{1,3}(1,2,grangerft.freq>42 & grangerft.freq<62));
     npGCci(ncov) = mean(granger{2,3}(1,2,:));
 end
-% save('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5A_CItab','npdCi','npGCci')
+save('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5A_CItab','npdCi','npGCci')
 load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5A_CItab','npdCi','npGCci')
 
-SNRDB = 10*log10(snrbank(:,1));
+% SNRDB = 10*log10(snrbank(:,1));
+SNRDB = 10*log10(snrbpbank(:,1));
 
 A = SNRDB;
 % scatter(NCvec,npPow,40,cmapn(1,:),'filled')
@@ -80,11 +86,11 @@ hold on
 % [param,stat]=sigm_fit(A,nscoh)
 % hold on
 pa(2) = scatter(A,npd,40,cmapn(3,:),'filled');
-plot(A,repmat(npdCi(1),1,size(A,1)),'LineStyle','--','color',cmapn(3,:))
+plot(A,repmat(npdCi(floor(NC/2)),1,size(A,1)),'LineStyle','--','color',cmapn(3,:))
 
 % [param,stat]=sigm_fit(A,npd)
 pa(3) = scatter(A,npGC,40,cmapn(2,:),'filled');
-plot(A,repmat(npGCci(1),1,size(A,1)),'LineStyle','--','color',cmapn(2,:))
+plot(A,repmat(npGCci(floor(NC/2)),1,size(A,1)),'LineStyle','--','color',cmapn(2,:))
 
 % [param,stat]=sigm_fit(A,npGC); %,[],[.0043 0.5884 0.689 -3.76])
 grid on

@@ -1,6 +1,6 @@
 function [] = wrapper_Fig8B_AsymSNR(X,NC)
-NCvec(1,:) = [0.01 1 10];
-NCvec(2,:) = repmat(0.01,1,NC);
+NCvec(2,:) = [0.01 1 10];
+NCvec(1,:) = repmat(0.01,1,NC);
 NCvec = sqrt(NCvec); % convert to std
 
 nc_col_sc = [1 0.9 0.8];
@@ -13,7 +13,7 @@ cmap = linspecer(4);
 lsstyles = {'-','-.',':'};
 for ncov = 1:NC
         if ncov == 1
-        bstrp = 1;
+        bstrp = 0;
     else
         bstrp = 0;
     end
@@ -23,13 +23,19 @@ for ncov = 1:NC
     %% Compute Signal Mixing
     randproc = randn(size(data.trial{1}));
     for i = 1:size(randproc,1)
-        s = data.trial{1}(i,:);
+        s = X.trial{1}(i,:);
         s = (s-mean(s))./std(s);
-        n  =((NCvec(i,ncov)*1).*randproc(i,:));
-        y = s+n;
+        n = ((NCvec(i,ncov)*1).*randproc(i,:));
+        %         si = filter(bfilt,afilt,s);
+        %         ni = filter(bfilt,afilt,n);
+        y = s + n;
         snr = var(s)/var(n);
         snrbank(ncov,i) = snr;
+        %         snrbp = var(si)/var(ni);
+        snrbp = computeBandLimSNR(s,n,[14 31],data);
+        snrbpbank(ncov,i) = snrbp;
         data.trial{1}(i,:) = y;
+
     end    
     %     if ncov == NC
     %         plotfig =1;
@@ -81,6 +87,11 @@ for ncov = 1:NC
     a =1;
 end
 
+SNRDB = 10*log10(snrbpbank(:,1));
+SNRBASE = 10*log10(snrbpbank(:,2));
+SRAT = SNRDB-SNRBASE;
+
+a = 1;
 
 % cfg = [];
 % cfg.viewmode = 'butterfly';  % you can also specify 'butterfly'

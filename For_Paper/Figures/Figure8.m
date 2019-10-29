@@ -2,8 +2,8 @@ close all; clear all
 addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\TWtools')
 %% Figure 8A
 % load('C:\Users\twest\Documents\Work\GitHub\Cortical_Parkinsons_Networks\Data\JB\ftdata\cleaned\V6_sources_clean_ROI_OFF_Right_ipsi_SMA.mat')
-load('C:\Users\twest\Documents\Work\GitHub\NPD_Validate\data\V6_sources_clean_ROI_OFF_Right_ipsi_SMA.mat'); % FREE
-% load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\data\V6_sources_clean_ROI_OFF_Right_ipsi_SMA.mat'); % SFLAP
+% load('C:\Users\twest\Documents\Work\GitHub\NPD_Validate\data\V6_sources_clean_ROI_OFF_Right_ipsi_SMA.mat'); % FREE
+load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\data\V6_sources_clean_ROI_OFF_Right_ipsi_SMA.mat'); % SFLAP
 wrapper_Fig8A_symSNR(vc_clean,3)
 figure(1)
 titlist = {'STN \leftrightarrow SMA','STN \rightarrow SMA','SMA \rightarrow STN'};

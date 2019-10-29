@@ -26,7 +26,7 @@ SigMixvec = linspace(0,1,NC);
 
 for SNR = 1:size(SNRvec,2)
     for SMx = 1:size(SigMixvec,2)
-    clear dataBank data
+        clear dataBank data
         parfor n = 1:nreps
             % Simulate Data
             cfg             = [];
@@ -38,33 +38,37 @@ for SNR = 1:size(SNRvec,2)
             cfg.params = CMat{Ncon,n}; %selected Ncon connections here!
             cfg.noisecov = NCV;
             data_raw = ft_connectivitysimulation(cfg);
-
+            
             % Do the Signal Mixing
             data = data_raw;
             sigmix = repmat(SigMixvec(SMx)/(Nsig-1),Nsig,Nsig).*~eye(Nsig);
             sigmix = sigmix+eye(Nsig).*1; %(1-NCvec(ncov));
             data.trial{1} = (data.trial{1} -mean(data.trial{1},2))./std(data.trial{1},[],2);
             data.trial{1} = sigmix*data.trial{1};
-
+            
             % NowDo the ASNR
             randproc = randn(size(data.trial{1}));
             for i = 1:size(randproc,1)
-                s = data.trial{1}(i,:);
+                s = X.trial{1}(i,:);
                 s = (s-mean(s))./std(s);
-                nr  =((SNRvec(i,SNR)*1).*randproc(i,:));
-                y = s+nr;
-                snr = var(s)/var(nr);
-                disp(snr)
-                %                 snrbank(SMx,n,i) = snr;
-                %         y = (y-mean(y))./std(y);
+                n = ((NCvec(ncov)*1).*randproc(i,:));
+                %         si = filter(bfilt,afilt,s);
+                %         ni = filter(bfilt,afilt,n);
+                y = s + n;
+                snr = var(s)/var(n);
+                snrbank(ncov,i) = snr;
+                %         snrbp = var(si)/var(ni);
+                snrbp = computeBandLimSNR(s,n,[45 55],data);
+                snrbpbank(ncov,i) = snrbp;
                 data.trial{1}(i,:) = y;
+                
             end
             dataBank{n} = data;
             %              dataBank{SNR,SMx,n} = data;
             disp([SNR SMx n])
         end
-    mkdir([cd '\benchmark'])
-    save([cd '\benchmark\simdata_10_' sprintf('%.0f_%.0f_%.0f',[SNR,SMx,Ncon])],'dataBank')
+        mkdir([cd '\benchmark'])
+        save([cd '\benchmark\simdata_10_' sprintf('%.0f_%.0f_%.0f',[SNR,SMx,Ncon])],'dataBank')
     end
 end
 
@@ -74,7 +78,7 @@ end
 for SNR = 1:size(SNRvec,2)
     for SMx = 1:size(SigMixvec,2)
         bstrap = 0;
-%         load([cd '\benchmark\10_NPG_CI_NPD_CI_' num2str(Ncon)],'NPG_ci','NPD_ci')
+        %         load([cd '\benchmark\10_NPG_CI_NPD_CI_' num2str(Ncon)],'NPG_ci','NPD_ci')
         load([cd '\benchmark\simdata_10_' sprintf('%.0f_%.0f_%.0f',[SNR,SMx,Ncon])],'dataBank')
         parfor n = 1:nreps
             
@@ -87,7 +91,7 @@ for SNR = 1:size(SNRvec,2)
             freq = computeSpectra(dataN,[0 0 0],3,0,'-',-1,(2^8)/dataN.fsample);
             [Hz granger grangerft] = computeGranger(freq,cmap(2,:),3,0,'--',1,bstrap);
             [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(dataN,1,8,1,bstrap);
-%             plotNPD(Hz,npdspctrm,dataN,cmap(3,:),1,':',1)
+            %             plotNPD(Hz,npdspctrm,dataN,cmap(3,:),1,':',1)
             %             if bstrap == 1
             %                 NPG_ci{SNR,SMx}= granger{2,2};
             %                 NPD_ci{SNR,SMx} = npdspctrm{2,2};
@@ -118,11 +122,11 @@ for SNR = 1:size(SNRvec,2)
             B = squeeze(sum((NPD_w>0.05),3));
             crit = ceil(size(NPD_w,3).*0.15);
             Bc_w = B>crit;
- 
-%             NPD_q = npdspctrmQ{1,3};
-%             B = squeeze(sum((NPD_q>0.05),3));
-%             crit = ceil(size(NPD_q,3).*0.15);
-%             Bc_q = B>crit;
+            
+            %             NPD_q = npdspctrmQ{1,3};
+            %             B = squeeze(sum((NPD_q>0.05),3));
+            %             crit = ceil(size(NPD_q,3).*0.15);
+            %             Bc_q = B>crit;
             
             NPDScore(SNR,SMx,n) = matrixScore(Bc,Z);
             

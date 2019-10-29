@@ -15,7 +15,7 @@ elseif strmatch(getenv('computername'),'DESKTOP-94CEG1L-2')
     
 end
 addpath([preFix_MLAD 'linspecer'])
-% addpath('C:\spm12'); spm eeg; close all
+addpath('C:\spm12'); spm eeg; close all
 addpath(spmpath); spm eeg; close all
 addpath([preFix_MLAD 'Neurospec\neurospec21'])
 addpath([preFix_MLAD 'Neurospec\PartialDirected'])

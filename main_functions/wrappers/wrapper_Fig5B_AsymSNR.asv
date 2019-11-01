@@ -103,4 +103,14 @@ xlabel('SAsym');ylabel('FC Difference')
 legend({'Coherence','NPD','Granger'})
 title('FC vs SNR Asymetry')
 xlim([-50 50])
-% xlim([-0.5 1])
+% xlim([-0.5 1
+
+% Effect size calculation
+% 99.9 prctile is CI
+% Z-score associated with 99.9 is 2.33
+% so std = CI/2.33
+% thus Z = max(NPD)/std
+% OR 
+% Deviation from 0 dSNR
+% max(abs(npGC))./mean(abs(npGC(12:14))) = 21.25
+% max(abs(npd))./mean(abs(npd(12:14))) = 1.46

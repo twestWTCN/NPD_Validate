@@ -22,8 +22,8 @@ cfg.params = C;
 cfg.noisecov = NCV;
 X = ft_connectivitysimulation(cfg);
 for ncov = 1:NC
-    if ncov == 1
-        bstrp = 0;
+    if ncov == floor(NC/2)
+        bstrp = 1;
     else
         bstrp = 0;
     end
@@ -89,12 +89,12 @@ figure(3)
 scatter(x,nscoh,50,cmapn(1,:),'Marker','+','LineWidth',3);
 hold on
 scatter(x,npd,40,cmapn(3,:),'filled')
-plot(x,repmat(npdCi(1),1,size(x,2)),'LineStyle','--','color',cmapn(3,:))
-plot(x,-repmat(npdCi(1),1,size(x,2)),'LineStyle','--','color',cmapn(3,:))
+plot(x,repmat(npdCi(floor(NC/2)),1,size(x,2)),'LineStyle','--','color',cmapn(3,:))
+plot(x,-repmat(npdCi(floor(NC/2)),1,size(x,2)),'LineStyle','--','color',cmapn(3,:))
 
 scatter(x,npGC,40,cmapn(2,:),'filled')
-plot(x,repmat(npGCci(1),1,size(x,2)),'LineStyle','--','color',cmapn(2,:))
-plot(x,-repmat(npGCci(1),1,size(x,2)),'LineStyle','--','color',cmapn(2,:))
+plot(x,repmat(npGCci(floor(NC/2)),1,size(x,2)),'LineStyle','--','color',cmapn(2,:))
+plot(x,-repmat(npGCci(floor(NC/2)),1,size(x,2)),'LineStyle','--','color',cmapn(2,:))
 
 grid on
 xlabel('Shared Variance (correlation)');ylabel('FC Magnitude')

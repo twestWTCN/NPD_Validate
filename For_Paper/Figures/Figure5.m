@@ -10,8 +10,8 @@ C(1,2,2) = 0.35;
 NCV     = eye(N).*0.3;
 
 % 5A - FC vs SNR
-figure(1)
-wrapper_Fig5A_SymSNR(C,NCV,25)
+% figure(1)
+% wrapper_Fig5A_SymSNR(C,NCV,25)
 
 % 5A - FC vs SNR Asymmetry
 figure(2)

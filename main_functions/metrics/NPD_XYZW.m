@@ -17,12 +17,19 @@ if bstrp == 1
     st13Z= nan([bsn,size(t13Z)]);
     sf13W= nan([bsn,size(f13W)]);
     st13W= nan([bsn,size(t13W)]);
-    parfor i = 1:bsn
-        xshuff = vectorShuff(x,winsize);
-        yshuff = vectorShuff(y,winsize);
-        zshuff = vectorShuff(z,winsize);
-        wshuff = vectorShuff(w,winsize);
-        [sf13(i,:,:),st13(i,:,:),sf13Z(i,:,:),st13Z(i,:,:),sf13W(i,:,:),st13W(i,:,:)] = NPD_XYZW(xshuff,yshuff,zshuff,wshuff,fsamp,npdord,0);
+    for i = 1:bsn
+        % If temporally bootstrapping
+%         xshuff = vectorShuff(x,winsize);
+%         yshuff = vectorShuff(y,winsize);
+%         zshuff = vectorShuff(z,winsize);
+%         wshuff = vectorShuff(w,winsize);
+%         [sf13(i,:,:),st13(i,:,:),sf13Z(i,:,:),st13Z(i,:,:),sf13W(i,:,:),st13W(i,:,:)] = NPD_XYZW(xshuff,yshuff,zshuff,wshuff,fsamp,npdord,0);
+        
+        % If phaserandomizing
+        [f13Z,t13Z,~]=sp2_R2a_pc1_tw(x',y',z',fsamp,winsize,1);
+        [f13W,t13W,~]=sp2_R2a_pc1_tw(x',y',w',fsamp,winsize,1);
+
+        
     end
     ci13 = repmat(mean(squeeze(prctile(sf13,99.9,1)),1),size(sf13,2),1);
     ci13Z = repmat(mean(squeeze(prctile(sf13Z,99.9,1)),1),size(sf13,2),1);

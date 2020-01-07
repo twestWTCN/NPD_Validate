@@ -23,7 +23,7 @@ data              = ft_connectivitysimulation(cfg);
 
 for ncov = 1:NC
     if ncov == 1
-        bstrp = 0;
+        bstrp = 1;
     else
         bstrp = 0;
     end

@@ -1,4 +1,4 @@
-function [f,t,cl,fyxzw]=sp2_R2a_pc1_tw(x,y,z,samp_rate,seg_size)
+function [f,t,cl,fyxzw]=sp2_R2a_pc1_tw(x,y,z,samp_rate,seg_size,bstrp)
 % function [f,t,cl,fyxw]=sp2_R2a_pc1(x,y,z,samp_rate,seg_size)
 %
 % Two channel average periodogram analysis, which include R2 analysis (ver 2) using MMSE pre-whitening
@@ -16,7 +16,9 @@ function [f,t,cl,fyxzw]=sp2_R2a_pc1_tw(x,y,z,samp_rate,seg_size)
 %
 % Outputs
 %       f, t, cl, fyxzw
-
+if nargin<6
+    bstrp = 0;
+end
 % Create zero mean sequence
 x=x-mean(x);
 y=y-mean(y);
@@ -40,6 +42,19 @@ end
 dx=fft(x);
 dy=fft(y);
 dz=fft(z);
+
+if bstrp == 1
+    % shuffle both
+    xiShuff = randi(seg_tot,1,seg_tot);
+    yiShuff = randi(seg_tot,1,seg_tot);
+    dx = dx(:,xiShuff);
+    dy = dy(:,yiShuff);
+elseif bstrp == 2
+    % shuffle one
+    xiShuff = randi(seg_tot,1,seg_tot);
+    dx = dx(:,xiShuff);
+    dy = dy;
+end
 
 % Need fxz, fyz, fzz to generate conditional dFT
 Izz=1/(2*pi*seg_size)*abs(dz.*dz);

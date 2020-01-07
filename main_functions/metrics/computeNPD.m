@@ -1,4 +1,4 @@
-function [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv npdcrcvZ npdcrcvW] = computeNPD(data,frstord,npdord,sclr,bstrap)
+function [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv npdcrcvZ npdcrcvW] = computeNPD(data,frstord,npdord,sclr,bstrap,bstraptype)
 if nargin<3
     npdord = 8;
 end
@@ -7,6 +7,9 @@ if nargin<4
 end
 if nargin<5
     bstrap = 0;
+end
+if nargin<6
+    bstraptype = 0;
 end
 % Partialised
 for i = 1:length(data.label)
@@ -21,7 +24,7 @@ for i = 1:length(data.label)
             %                 z2= [z2 data.trial{p}(sndord,:)];
         end
         fsamp = data.fsample;
-        [f13 t13 f13Z t13Z f13W t13W ci13 ci13Z ci13W] = NPD_XYZW(x,y,z,w,fsamp,npdord,bstrap);
+        [f13 t13 f13Z t13Z f13W t13W ci13 ci13Z ci13W] = NPD_XYZW(x,y,z,w,fsamp,npdord,bstrap,bstraptype);
 %         [f13 t13 f13Z t13Z f13W t13W f13Q t13Q ci13 ci13Z ci13W ci13Q] = NPD_XYZWQ(x,y,z,w,q,fsamp,npdord,bstrap);
         npdspctrm{1,1}(i,j,:) = sclr*f13(:,10);
         npdspctrm{1,2}(i,j,:) = sclr*f13(:,12); % Backward (j -> i)

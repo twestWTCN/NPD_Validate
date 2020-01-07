@@ -18,9 +18,10 @@ if bstrap == 1
     ispec = nan([size(igrangerft.instantspctrm) bsn]);
     spec = nan([size(grangerft.grangerspctrm) bsn]);
     
-    parfor i = 1:bsn
-        freqS = freqShuff(freq);
-        [grangerft,igrangerft] = NPG_freq(freqS,chinds,0)
+    for i = 1:bsn
+%       freqS = freqShuff(freq); % If bootstrapping spectra
+        freqS = phaseRand(freq); % If phase randomizing
+        [grangerft,igrangerft] = NPG_freq(freqS,chinds,0);
         ispec(:,:,:,i) = igrangerft.instantspctrm;
         spec(:,:,:,i) = grangerft.grangerspctrm;
     end

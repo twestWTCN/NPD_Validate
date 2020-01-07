@@ -23,9 +23,9 @@ data              = ft_connectivitysimulation(cfg);
 
 for ncov = 1:NC
     if ncov == 1
-        bstrp = 0;
+        bstrp = 0; bstraptype = 0;
     else
-        bstrp = 0;
+        bstrp = 0; bstraptype = 0;
     end
     cmapn = cmap.*nc_col_sc(ncov);
     ncv = NCvec(ncov);
@@ -70,7 +70,7 @@ for ncov = 1:NC
     
     %% NPD
     figure(2)
-    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1,8,1,bstrp);
+    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1,8,1,bstrp,bstraptype);
     coh.freq= Hz; coh.cohspctrm = nscohspctrm{1}; coh.ci = nscohspctrm{2};
     % NS Coh
     plotNSCoherence(coh,cmapn(1,:),Nsig,plotfig,linestyle,bstrp)

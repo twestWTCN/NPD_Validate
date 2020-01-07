@@ -1,4 +1,7 @@
-function [f,t,cl]=sp2a2_R2_tw(x,y,samp_rate,seg_pwr,bstrptype)
+function [f,t,cl]=sp2a2_R2_tw(x,y,samp_rate,seg_pwr,bstrp)
+if nargin<6
+    bstrp = 0;
+end
 % function [f,t,cl]=sp2a2_R2(x,y,samp_rate,seg_pwr)
 %
 % Two channel average periodogram analysis, with R2 directionality analysis.
@@ -95,9 +98,6 @@ function [f,t,cl]=sp2a2_R2_tw(x,y,samp_rate,seg_pwr,bstrptype)
 % function [f,t,cl]=sp2a2_R2(x,y,samp_rate,seg_pwr)
 
 % Check number of input arguments
-if nargin<5
-    bstrptype = 0;
-end
 if (nargin<4)
   error(' Not enough input arguments');
 end
@@ -148,13 +148,13 @@ end
 dx=fft(x);   % dFT across columns, PBMB (4.1)
 dy=fft(y);
 
-if bstrptype == 1
+if bstrp == 1
     % shuffle both
     xiShuff = randi(seg_tot,1,seg_tot);
     yiShuff = randi(seg_tot,1,seg_tot);
     dx = dx(:,xiShuff);
     dy = dy(:,yiShuff);
-elseif bstrptype == 2
+elseif bstrp == 2
     % shuffle one
     xiShuff = randi(seg_tot,1,seg_tot);
     dx = dx(:,xiShuff);

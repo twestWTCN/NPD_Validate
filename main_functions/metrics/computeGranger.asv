@@ -8,7 +8,7 @@ end
 null = nan(size(freq.freq));
 if mvflag == 1
     %Multivariate
-    [grangerft,igrangerft] = NPG_freq(freq,[],bstrp,bstraptype);
+    [grangerft,igrangerft] = NPG_freq(freq,[],bstrp);
 end
 for i = 1:length(freq.label)
     for j = 1:length(freq.label)
@@ -16,7 +16,7 @@ for i = 1:length(freq.label)
             if i == j
                 %                 [grangerft,igrangerft] = NPG_freq(freq,[i j],0);
             else
-                [grangerft,igrangerft] = NPG_freq(freq,[i j],bstrp,bstraptype); % Recompute the estimate using pairs of data (rest of data unseen)
+                [grangerft,igrangerft] = NPG_freq(freq,[i j],bstrp);
             end
             if i<j
                 ip = 1; jp = 2;

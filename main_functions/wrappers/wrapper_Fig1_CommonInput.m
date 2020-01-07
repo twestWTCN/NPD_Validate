@@ -19,11 +19,11 @@ cfg.nsignal     = Nsig;
 cfg.method      = 'ar';
 cfg.params = C;
 cfg.noisecov = NCV;
-data              = ft_connectivitysimulation(cfg);
+data = ft_connectivitysimulation(cfg);
 
 for ncov = 1:NC
     if ncov == 1
-        bstrp = 0; bstraptype = 0;
+        bstrp = 1; bstraptype = 1;
     else
         bstrp = 0; bstraptype = 0;
     end
@@ -59,15 +59,8 @@ for ncov = 1:NC
     
     %% Power
     figure(2)
-    freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle);
-    
-    %% Coherence
-    %         figure(2)
-    %    computeCoherence(freq,cmap(1,:),Nsig,plotfig,linestyle)
-    
-    %     %% WPLI
-    %     computeWPLI(freq,cmap,Nsig,linestyle)
-    
+    freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle,-1);
+       
     %% NPD
     figure(2)
     [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1,8,1,bstrp,bstraptype);
@@ -83,7 +76,7 @@ for ncov = 1:NC
     
     %% GRANGER
     figure(2)
-    computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle,1,bstrp)
+    computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle,1,bstrp,bstraptype)
     
     %% NPD CORR
     %     figure(3)
@@ -92,8 +85,7 @@ for ncov = 1:NC
     a =1;
 end
 % save('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F1_CItab','npdCi','npGCci')
-load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F1A_CItab','npdCi','npGCci')
-
+% load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F1A_CItab','npdCi','npGCci')
 
 % cfg = [];
 % cfg.viewmode = 'butterfly';  % you can also specify 'butterfly'

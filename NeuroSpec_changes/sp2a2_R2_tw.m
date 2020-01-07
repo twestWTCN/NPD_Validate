@@ -154,12 +154,6 @@ if bstrptype == 1
     yiShuff = randi(seg_tot,1,seg_tot);
     dx = dx(:,xiShuff);
     dy = dy(:,yiShuff);
-elseif bstrptype == 2
-    % shuffle one
-    xiShuff = randi(seg_tot,1,seg_tot);
-    dx = dx(:,xiShuff);
-    dy = dy;
-
 end
     
     

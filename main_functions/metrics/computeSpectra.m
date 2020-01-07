@@ -1,6 +1,6 @@
 function freq = computeSpectra(data,cmap,Nsig,plotfig,linestyle,smord,dl)
 if nargin<6
-    smord = 2;
+    smord = -1;
 end
 if nargin<7
     dl = 1;

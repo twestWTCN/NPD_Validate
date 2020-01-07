@@ -17,12 +17,11 @@ if bstrp == 1
     st13Z= nan([bsn,size(t13Z)]);
     sf13W= nan([bsn,size(f13W)]);
     st13W= nan([bsn,size(t13W)]);
-    for i = 1:bsn
+    parfor i = 1:bsn
         [sf13(i,:,:),st13(i,:,:),~]=sp2a2_R2_tw(x',y',fsamp,npdord,bstrptype);
         [sf13Z(i,:,:),st13Z(i,:,:),~]=sp2_R2a_pc1_tw(x',y',z',fsamp,winsize,bstrptype);
         [sf13W(i,:,:),st13W(i,:,:),~]=sp2_R2a_pc1_tw(x',y',w',fsamp,winsize,bstrptype);
     end
-    
     ci13 = repmat(mean(squeeze(prctile(sf13,99.9,1)),1),size(sf13,2),1);
     ci13Z = repmat(mean(squeeze(prctile(sf13Z,99.9,1)),1),size(sf13,2),1);
     ci13W = repmat(mean(squeeze(prctile(sf13W,99.9,1)),1),size(sf13,2),1);

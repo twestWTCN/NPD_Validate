@@ -14,7 +14,7 @@ cfg.method    = 'instantaneous_causality';
 igrangerft      = ft_connectivityanalysis(cfg, freq);
 
 if bstrap == 1
-    bsn = 100;
+    bsn = 1000;
     ispec = nan([size(igrangerft.instantspctrm) bsn]);
     spec = nan([size(grangerft.grangerspctrm) bsn]);
     
@@ -35,6 +35,6 @@ end
 function L = meanVec(spec)
 for i = 1:size(spec,1);
     for j = 1:size(spec,2)
-        L(i,j,:) = repmat(mean(squeeze(prctile(spec(i,j,:,:),99.9,4))),1,size(spec,3));
+        L(i,j,:) = repmat(mean(squeeze(prctile(spec(i,j,:,:),90,4))),1,size(spec,3));
     end
 end

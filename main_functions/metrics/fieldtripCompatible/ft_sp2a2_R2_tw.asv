@@ -1,4 +1,4 @@
-function [f,t,cl]=sp2a2_R2_tw(x,y,samp_rate,seg_pwr,bstrptype)
+function [f,t,cl]=ft_sp2a2_R2_tw(dx,dy,samp_rate,seg_pwr,bstrptype)
 % function [f,t,cl]=sp2a2_R2(x,y,samp_rate,seg_pwr)
 %
 % Two channel average periodogram analysis, with R2 directionality analysis.
@@ -106,51 +106,40 @@ if (nargout<3)
     error(' Not enough output arguments');
 end
 
-% Check for single column data
-[nrow,ncol]=size(x);
-if (ncol~=1)
-    error(' Input NOT single column: x')
-end
-[nrow,ncol]=size(y);
-if (ncol~=1)
-    error(' Input NOT single column: y')
-end
+% % Check for single column data
+% [nrow,ncol]=size(x);
+% if (ncol~=1)
+%     error(' Input NOT single column: x')
+% end
+% [nrow,ncol]=size(y);
+% if (ncol~=1)
+%     error(' Input NOT single column: y')
+% end
 
-pts_tot=length(x);           % Determine size of data vector
-if (length(y)~=pts_tot)      % Check that input vectors are equal length
-    error (' Unequal length data arrays');
-end
-
-if (max(size(samp_rate)) ~= 1)
-    error(' Non scalar value for: samp_rate');
-end
-if (max(size(seg_pwr)) ~= 1)
-    error(' Non scalar value for: seg_pwr');
-end
-
+% pts_tot=length(x);           % Determine size of data vector
+% if (length(y)~=pts_tot)      % Check that input vectors are equal length
+%     error (' Unequal length data arrays');
+% end
+% 
+% if (max(size(samp_rate)) ~= 1)
+%     error(' Non scalar value for: samp_rate');
+% end
+% if (max(size(seg_pwr)) ~= 1)
+%     error(' Non scalar value for: seg_pwr');
+% end
+% 256 x 195
 % Segment for FFT - Rows: seg_size, T. Columns: seg_tot, L
+
+% Correct Spectra to be two sided:
+dx = [dx; exp(-1i*flipud(dx(2:end-1,:))];
+dy = [dy; flipud(dy(2:end-1,:))];
+
 seg_size=fix(2^seg_pwr);              % Segment length, T
 if rem(seg_size,2)
     seg_size = seg_size+1;
 end
-seg_tot=fix(length(x)/seg_size); % No of segments, L
+seg_tot= size(dx,2); % No of segments, L
 samp_tot=seg_tot*seg_size;       % Record length,  R=LT
-x=reshape(x(1:samp_tot),seg_size,seg_tot);  % T rows, L columns
-y=reshape(y(1:samp_tot),seg_size,seg_tot);  % T rows, L columns
-
-% Create zero mean sequence for each segment.
-for ind=1:seg_tot
-    x(:,ind)=x(:,ind)-mean(x(:,ind));
-    y(:,ind)=y(:,ind)-mean(y(:,ind));
-end
-
-% Apply Hanning
-% x = hanning(size
-
-
-% FFT & average periodogram
-dx=fft(x);   % dFT across columns, PBMB (4.1)
-dy=fft(y);
 
 if bstrptype == 1
     % shuffle both

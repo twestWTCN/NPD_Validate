@@ -1,4 +1,4 @@
-function [f,t,cl,fyxzw]=sp2_R2a_pc1_tw(x,y,z,samp_rate,seg_size,bstrp)
+function [f,t,cl,fyxzw]=ft_sp2_R2a_pc1_tw(dx,dy,dz,samp_rate,seg_pwr,bstrp)
 % function [f,t,cl,fyxw]=sp2_R2a_pc1(x,y,z,samp_rate,seg_size)
 %
 % Two channel average periodogram analysis, which include R2 analysis (ver 2) using MMSE pre-whitening
@@ -19,29 +19,16 @@ function [f,t,cl,fyxzw]=sp2_R2a_pc1_tw(x,y,z,samp_rate,seg_size,bstrp)
 if nargin<6
     bstrp = 0;
 end
-% Create zero mean sequence
-x=x-mean(x);
-y=y-mean(y);
-z=z-mean(z);
+% Correct Spectra to be two sided:
+dx = [dx; flipud(dx(2:end-1,:))];
+dy = [dy; flipud(dy(2:end-1,:))];
+dz = [dz; flipud(dz(2:end-1,:))];
+
+seg_size=fix(2^seg_pwr);              % Segment length, T
 
 % Segment for FFT - rows: seg_size. Columns: seg_tot
-seg_tot=floor(length(x)/seg_size);
-samp_tot=seg_tot*seg_size;
-x=reshape(x(1:seg_tot*seg_size),seg_size,seg_tot);
-y=reshape(y(1:seg_tot*seg_size),seg_size,seg_tot);
-z=reshape(z(1:seg_tot*seg_size),seg_size,seg_tot);
-
-% Zero mean for each segment
-for ind=1:seg_tot
-    x(:,ind)=x(:,ind)-mean(x(:,ind));
-    y(:,ind)=y(:,ind)-mean(y(:,ind));
-    z(:,ind)=z(:,ind)-mean(z(:,ind));
-end
-
-% FFT of 3 processes
-dx=fft(x);
-dy=fft(y);
-dz=fft(z);
+seg_tot= size(dx,2); % No of segments, L
+samp_tot=seg_tot*seg_size;       % Record length,  R=LT
 
 if bstrp == 1
     % shuffle both

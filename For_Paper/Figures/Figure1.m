@@ -13,7 +13,7 @@ C(3,1,3) = 0.5;
 NCV     = eye(N).*0.3;
 fstord = 2;
 sndord = [2 3];
-wrapper_Fig1_CommonInput(C,NCV,1,fstord,sndord,fname)
+wrapper_Fig1_CommonInput_tmp(C,NCV,1,fstord,sndord,fname)
 
 figure(1)
 set(gca, 'Color', 'None'); box off

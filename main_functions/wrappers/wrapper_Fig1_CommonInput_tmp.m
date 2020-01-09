@@ -1,4 +1,4 @@
-function [] = wrapper_Fig1_CommonInput(C,NCV,NC,frstord,sndord,fname)
+function [] = wrapper_Fig1_CommonInput_tmp(C,NCV,NC,frstord,sndord,fname)
 
 % NCvec = linspace(0,1,NC);
 NCvec = [0 0.5 0.8];
@@ -64,9 +64,8 @@ for ncov = 1:NC
        
     %% NPD
     figure(2)
-    
-    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1,8,1,bstrp,bstraptype);
-%     [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = ft_computeNPD(freq,cfg.fsample,1,8,bstrp,bstraptype);
+%     [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1,8,1,bstrp,bstraptype);
+    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = ft_computeNPD(freq,cfg.fsample,1,8,bstrp,bstraptype);
 
     coh.freq= Hz; coh.cohspctrm = nscohspctrm{1}; coh.ci = nscohspctrm{2};
     % NS Coh

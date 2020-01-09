@@ -25,16 +25,16 @@ cfg.keeptrials = 'yes';
 cfg.padtype = 'zero';
 % cfg.pad = 2;
 freq          = ft_freqanalysis(cfg, data);
+
 if plotfig
-    
     for row=1:Nsig
         for col=1:Nsig
             if row==col
                 subplot(Nsig,Nsig,(row-1)*Nsig+col);
                 Pxy=  mean(abs(squeeze(freq.fourierspctrm(:,col,:))),1);
-                [xCalc yCalc b Rsq] = linregress(freq.freq',Pxy');
-                Pxy = Pxy-yCalc';
-                Pxy = Pxy+abs(min(Pxy));
+%                 [xCalc yCalc b Rsq] = linregress(freq.freq',Pxy');
+%                 Pxy2 = Pxy-yCalc';
+%                 Pxy2 = Pxy+abs(min(Pxy2));
                 plot(freq.freq,Pxy,'color',cmap,'LineWidth',2,'linestyle',linestyle)
                 hold on
             end

@@ -1,4 +1,4 @@
-function [Hz granger grangerft] = computeGranger(freq,mvflag,bstrp,bstraptype)
+function [Hz granger grangerft] = computeGranger(freq,,Nsig,plotfig,linestyle,mvflag,bstrp,bstraptype)
 if nargin<6
     mvflag = 0;
 end

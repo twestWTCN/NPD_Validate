@@ -1,4 +1,4 @@
-function [f,t,cl,fyxzw]=ft_sp2_R2a_pc1_tw(dx,dy,dz,samp_rate,seg_pwr,bstrp)
+function [f,t,cl,fyxzw]=ft_sp2_R2a_pc1_tw(dx,dy,dz,samp_rate,seg_pwr,permtype)
 % function [f,t,cl,fyxw]=sp2_R2a_pc1(x,y,z,samp_rate,seg_size)
 %
 % Two channel average periodogram analysis, which include R2 analysis (ver 2) using MMSE pre-whitening
@@ -17,12 +17,12 @@ function [f,t,cl,fyxzw]=ft_sp2_R2a_pc1_tw(dx,dy,dz,samp_rate,seg_pwr,bstrp)
 % Outputs
 %       f, t, cl, fyxzw
 if nargin<6
-    bstrp = 0;
+    permtype = 0;
 end
 % Correct Spectra to be two sided:
-dx = [dx; flipud(dx(2:end-1,:))];
-dy = [dy; flipud(dy(2:end-1,:))];
-dz = [dz; flipud(dz(2:end-1,:))];
+dx = [dx; conj(flipud(dx(2:end-1,:)))];
+dy = [dy; conj(flipud(dy(2:end-1,:)))];
+dz = [dz; conj(flipud(dz(2:end-1,:)))];
 
 seg_size=fix(2^seg_pwr);              % Segment length, T
 
@@ -30,7 +30,7 @@ seg_size=fix(2^seg_pwr);              % Segment length, T
 seg_tot= size(dx,2); % No of segments, L
 samp_tot=seg_tot*seg_size;       % Record length,  R=LT
 
-if bstrp == 1
+if permtype == 1
     % shuffle both
     xiShuff = randi(seg_tot,1,seg_tot);
     yiShuff = randi(seg_tot,1,seg_tot);
@@ -38,7 +38,7 @@ if bstrp == 1
     dx = dx(:,xiShuff);
     dy = dy(:,yiShuff);
     dz = dz(:,ziShuff);
-elseif bstrp == 2
+elseif permtype == 2
     % phase randomize
     dx = phaseRandomize(dx);
     dy = phaseRandomize(dy);

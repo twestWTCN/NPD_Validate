@@ -1,4 +1,4 @@
-function [f,t,cl]=ft_sp2a2_R2_tw(dx,dy,samp_rate,seg_pwr,bstrptype)
+function [f,t,cl]=ft_sp2a2_R2_tw(dx,dy,samp_rate,seg_pwr,permtype)
 % function [f,t,cl]=sp2a2_R2(x,y,samp_rate,seg_pwr)
 %
 % Two channel average periodogram analysis, with R2 directionality analysis.
@@ -96,7 +96,7 @@ function [f,t,cl]=ft_sp2a2_R2_tw(dx,dy,samp_rate,seg_pwr,bstrptype)
 
 % Check number of input arguments
 if nargin<5
-    bstrptype = 0;
+    permtype = 0;
 end
 if (nargin<4)
     error(' Not enough input arguments');
@@ -131,11 +131,8 @@ end
 % Segment for FFT - Rows: seg_size, T. Columns: seg_tot, L
 
 % Correct Spectra to be two sided:
-% dx = [dx; flipud(dx(2:end-1,:))];
-% dy = [dy; flipud(dy(2:end-1,:))];
-
-dx = [dx; conj(flipud(-dx(2:end-1,:)))];
-dy = [dy; conj(flipud(-dy(2:end-1,:)))];
+dx = [dx; conj(flipud(dx(2:end-1,:)))];
+dy = [dy; conj(flipud(dy(2:end-1,:)))];
 
 
 seg_size=fix(2^seg_pwr);              % Segment length, T
@@ -145,13 +142,13 @@ end
 seg_tot= size(dx,2); % No of segments, L
 samp_tot=seg_tot*seg_size;       % Record length,  R=LT
 
-if bstrptype == 1
+if permtype == 1
     % shuffle both
     xiShuff = randi(seg_tot,1,seg_tot);
     yiShuff = randi(seg_tot,1,seg_tot);
     dx = dx(:,xiShuff);
     dy = dy(:,yiShuff);
-elseif bstrptype == 2
+elseif permtype == 2
     % phase randomize
     dx = phaseRandomize(dx);
     dy = phaseRandomize(dy);

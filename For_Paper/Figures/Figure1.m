@@ -1,11 +1,13 @@
 % NPD_Validate_AddPaths()
-% % % mvarconsim_npdver(C,NCV,fstord,sndord,fname)
 close all
+%% This script will reproduce Figure 1 - 
+% Three-node simulation of MVAR model to compare functional connectivity measures.
 
-%% Figure 1 - Common Input (Model 1)
+% Setup the Simulation
 fname = 'Figure1';
 N = 3; % # of nodes
 MO = 3;% model order
+% Define Connectivity and Autonomous Oscillations
 C = repmat(repmat(0.5,N,N).*eye(N),1,1,MO);
 C(:,:,2) = -C(:,:,2);
 C(2,1,2) = 0.5;
@@ -13,8 +15,11 @@ C(3,1,3) = 0.5;
 NCV     = eye(N).*0.3;
 fstord = 2;
 sndord = [2 3];
-wrapper_Fig1_CommonInput_tmp(C,NCV,1,fstord,sndord,fname)
 
+% This is the main routine:
+wrapper_Fig1_CommonInput(C,NCV,1)
+
+% Now Configure plots:
 figure(1)
 set(gca, 'Color', 'None'); box off
 set(gcf,'Position',[704   678   536   321])

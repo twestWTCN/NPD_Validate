@@ -1,17 +1,16 @@
 function [] = wrapper_Fig3_AsymSNR(C,NCV,NC)
 % Asymetric SNRs
-% NCvec = linspace(0,2,NC);
+% Setup std for the channels:
 NCvec = [0.01  1      10
          0.01  0.01   0.01
          0.01  0.01   0.01];
-NCvec = sqrt(NCvec);
-nc_col_sc = [1 0.9 0.8];
-for i = 1:NC
-    NCtits{i} = ['SigLeak = ' num2str(NCvec(i))];
-end
-rng(8281)
+NCvec = sqrt(NCvec); % convert to variance
+
+nc_col_sc = [1 0.9 0.8]; % rescale colors
 cmap = linspecer(4);
-lsstyles = {'-','-.',':'};
+lsstyles = {'-','-.',':'};% linestyles
+
+% Run the MVAR Simulation (fieldtrip implementation uses BSMART)
 Nsig = size(C,1);
 cfg             = [];
 cfg.ntrials     = 1;
@@ -23,19 +22,23 @@ cfg.params = C;
 cfg.noisecov = NCV;
 X              = ft_connectivitysimulation(cfg);
 
-
+segOrd = 8; % 2^n length of segment used for FFT
 for ncov = 1:NC
     if ncov == 1
-        bstrp = 0;
+        perm = 1;
+        permtype = 2;
     else
-        bstrp = 0;
+        perm = 0;
+        permtype = 0;
     end
-    plotfig =1;
+    
+    % Plotting parameters
     linestyle = lsstyles{ncov};
     cmapn = cmap.*nc_col_sc(ncov);
-    ncv = NCvec(ncov);
-    data = X;
+    plotfig =1;
+    
     %% Compute Signal Mixing
+    data = X;
     randproc = randn(size(data.trial{1}));
     for i = 1:size(randproc,1)
         s = data.trial{1}(i,:);
@@ -46,6 +49,7 @@ for ncov = 1:NC
         snrbank(ncov,i) = snr;
         data.trial{1}(i,:) = y;
     end
+    
     %% Plot Example Trace
     figure(1)
     plot(data.time{1},data.trial{1}+[0 2.5 5]');
@@ -53,45 +57,32 @@ for ncov = 1:NC
     xlabel('Time'); ylabel('Amplitude'); grid on
     legend({'X1','X2','X3'})
     
-    %% Power
+    %% Compute Power with Fieldtrip (used for NPD and NPG computations)
     figure(2)
-    freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle);
+    datalength = (2^segOrd)./cfg.fsample;
+    freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle,-1,datalength);
     
     %% Coherence
     %     figure(2)
     %     computeCoherence(freq,cmap(1,:),Nsig,plotfig,linestyle)
     
-    %     %% WPLI
-    %     computeWPLI(freq,cmap,Nsig,linestyle)
-    
-    %% NPD
+    %% Compute and Plot NPD
     figure(2)
-    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1);
+    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = ft_computeNPD(freq,cfg.fsample,1,segOrd,perm,permtype);
     coh.freq= Hz; coh.cohspctrm = nscohspctrm{1}; coh.ci = nscohspctrm{2};
-    % NS Coh
-    %     computeNSCoherence(coh,cmapn(1,:),Nsig,plotfig,linestyle)
-    %     plotNPD_zero(Hz,npdspctrm,data,cmap(1,:),plotfig,linestyle)
-    % NPD
-%     plotNPD(Hz,npdspctrm,data,cmapn(3,:),plotfig,linestyle,bstrp)
-    % NPDx1
-    %     plotNPD(Hz,npdspctrmZ,data,cmapn(4,:),plotfig,linestyle)
-    %     plotNPD(Hz,npdspctrmW,data,cmap(4,:),plotfig,linestyle)
-    plotDiffNPD(Hz,npdspctrm,data,cmapn(3,:),plotfig,linestyle,bstrp)
-    %% GRANGER
-    figure(2)
-    computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle,0,bstrp)
-    
-    %% NPD CORR
-    %     figure(3)
-    %     plotNPDXCorr(lags,npdcrcv,data,[0 0 0],plotfig,linestyle)
-    a =1;
-end
 
+    % Plot NPD differential 
+    plotDiffNPD(Hz,npdspctrm,data,cmapn(3,:),plotfig,linestyle,perm)
+    
+    %% Compute and plot NPG
+    figure(2)
+    [Hz granger grangerft] = computeGranger(freq,0,perm,permtype)
+    % Plot NPG differential 
+    plotDiffNPD(grangerft.freq,granger,freq,cmapn(2,:),1,linestyle,perm)
+end
+ % Review the estimated SNRs
 SNRDB = 10*log10(snrbank(:,1));
 SNRBASE = 10*log10(snrbank(:,2));
 SRAT = SNRDB-SNRBASE;
 
 a= 1;
-% cfg = [];
-% cfg.viewmode = 'butterfly';  % you can also specify 'butterfly'
-% ft_databrowser(cfg, data);

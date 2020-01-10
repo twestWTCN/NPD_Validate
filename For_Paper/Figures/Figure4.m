@@ -1,7 +1,11 @@
+% NPD_Validate_AddPaths()
 close all; clear;
 % 
-%% Figure 4 - Effects of Signal Mixing
-fname = 'Figure4';
+%% This script will reproduce Figure 4 -
+% Analysis of the effects of instantaneous mixing upon
+% estimates of directed functional connectivity (dFC). 
+
+% Setup the Simulation
 N = 3; % # of nodes
 MO = 3;% model order
 C = repmat(repmat(0.5,N,N).*eye(N),1,1,MO);
@@ -9,10 +13,11 @@ C(:,:,2) = -C(:,:,2);
 C(2,1,2) = 0.5;
 C(3,1,3) = 0.5;
 NCV     = eye(N).*0.3;
-fstord = 2;
-sndord = [2 3];
-wrapper_Fig4_SigMix(C,NCV,3,fstord,sndord,fname)
 
+% This is the main routine:
+wrapper_Fig4_SigMix(C,NCV,3)
+
+% Now Configure plots:
 figure(3)
 set(gcf,'Position',[1077         347         867         734])
 legend('\lambda = 0','\lambda = 0.3','\lambda = 0.6')

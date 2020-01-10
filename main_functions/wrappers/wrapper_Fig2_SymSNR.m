@@ -8,6 +8,7 @@ cmap = linspecer(4);
 lsstyles = {'-','-.',':'};
 
 % Run the MVAR Simulation (fieldtrip implementation uses BSMART)
+rng(1236)
 Nsig = size(C,1);
 cfg             = [];
 cfg.ntrials     = 1;
@@ -51,12 +52,7 @@ for ncov = 1:NC
     figure(2)
     datalength = (2^segOrd)./cfg.fsample;
     freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle,-1,datalength);
-    
-    %% Coherence
-    %     figure(2)
-    %     computeCoherence(freq,cmap(1,:),Nsig,plotfig,linestyle)
-    
-    
+        
     %% Compute and Plot NPD
     figure(2)
     [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = ft_computeNPD(freq,cfg.fsample,1,segOrd,perm,permtype);

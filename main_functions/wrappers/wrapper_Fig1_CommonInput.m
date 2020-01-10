@@ -6,6 +6,7 @@ cmap = linspecer(4); % lineplot colors
 lsstyles = {'-','-.',':'}; % linestyles
 
 % Run the MVAR Simulation (fieldtrip implementation uses BSMART)
+rng(8532)
 Nsig = size(C,1);
 cfg             = [];
 cfg.ntrials     = 1;

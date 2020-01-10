@@ -35,6 +35,6 @@ end
 function L = meanVec(spec)
 for i = 1:size(spec,1);
     for j = 1:size(spec,2)
-        L(i,j,:) = repmat(mean(squeeze(prctile(spec(i,j,:,:),99.9,4))),1,size(spec,3));
+        L(i,j,:) = repmat(mean(squeeze(prctile(spec(i,j,:,:),99.99,4))),1,size(spec,3));
     end
 end

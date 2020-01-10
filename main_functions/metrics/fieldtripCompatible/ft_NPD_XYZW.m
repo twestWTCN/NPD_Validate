@@ -20,9 +20,9 @@ if perm == 1
         [sf13Z(i,:,:),st13Z(i,:,:),~]=ft_sp2_R2a_pc1_tw(dx',dy',dz',fsamp,npdord,permtype);
         [sf13W(i,:,:),st13W(i,:,:),~]=ft_sp2_R2a_pc1_tw(dx',dy',dw',fsamp,npdord,permtype);
     end
-    ci13 = repmat(mean(squeeze(prctile(sf13,99.9,1)),1),size(sf13,2),1);
-    ci13Z = repmat(mean(squeeze(prctile(sf13Z,99.9,1)),1),size(sf13,2),1);
-    ci13W = repmat(mean(squeeze(prctile(sf13W,99.9,1)),1),size(sf13,2),1);
+    ci13 = repmat(mean(squeeze(prctile(sf13,99.99,1)),1),size(sf13,2),1);
+    ci13Z = repmat(mean(squeeze(prctile(sf13Z,99.99,1)),1),size(sf13,2),1);
+    ci13W = repmat(mean(squeeze(prctile(sf13W,99.99,1)),1),size(sf13,2),1);
 else
     ci13 = zeros(size(f13));
     ci13Z = zeros(size(f13Z));

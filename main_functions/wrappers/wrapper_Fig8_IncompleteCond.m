@@ -1,14 +1,17 @@
-function [] = wrapper_Fig7_IncompleteCond(C,NCV,NC)
+function [] = wrapper_Fig8_IncompleteCond(C,NCV,NC)
+% Simulate and analyses different routing + partialized NPD
 
+% Sweep across SNRs of hidden node
 NCvec = logspace(log10(0.001),log10(2000),NC);
 NCvec = sqrt(NCvec); % convert to std
 
-% NCvec = [0 0.5 1.5];
+
 nc_col_sc = [1 0.9 0.8];
-
-
 cmap = linspecer(4);
 lsstyles = {'-','-.',':'};
+
+% Run the MVAR Simulation (fieldtrip implementation uses BSMART)
+rng(95342)
 Nsig = size(C,1);
 cfg             = [];
 cfg.ntrials     = 1;
@@ -19,19 +22,28 @@ cfg.method      = 'ar';
 cfg.params = C;
 cfg.noisecov = NCV;
 X              = ft_connectivitysimulation(cfg);
-
+segOrd = 8; % 2^n length of segment used for FFT
 
 for ncov = 1:NC
+    
     if ncov == 1
-        bstrp = 0;
+%         perm = 1;
+%         permtype = 2;
+        % Can switch off if you have run once to save the results see
+        % L75-76
+        perm = 0;
+        permtype = 0;        
     else
-        bstrp = 0;
+        perm = 0;
+        permtype = 0;
     end
-    rng(124321)
+    
+    % Plotting parameters
     plotfig =0;
     linestyle = lsstyles{1};
     cmapn = cmap.*nc_col_sc(1);
-    ncv = NCvec(ncov);
+    
+    %% Modify SNR of hidden node
     data = X;
     randproc = randn(size(data.trial{1}));
     for i = 2
@@ -43,45 +55,26 @@ for ncov = 1:NC
         snrbank(ncov,i) = snr;
         data.trial{1}(i,:) = y;
     end
-    
-    
-    %% Plot Example Trace
-    %     figure(1)
-    %     plot(X.time{1},X.trial{1}+[0 2.5 5]');
-    %     xlim([100 105])
-    %     xlabel('Time'); ylabel('Amplitude'); grid on
-    %     legend({'X1','X2','X3'})
-    
-    freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle);
-    pow = mean(abs(squeeze(freq.fourierspctrm(:,1,:))),1);
+   
+    %% Compute Power with Fieldtrip (used for NPD and NPG computations)
+    datalength = (2^segOrd)./cfg.fsample;
+    freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle,-1,datalength);
+    pow = mean(abs(squeeze(freq.fourierspctrm(:,1,:))),1); % Convert to power
     npPow(ncov) = max(pow(freq.freq>42 & freq.freq<62));
     
-    %% NPD
+    %% Compute NPD with Neurospec
     coh = [];
-    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,2,8,1,bstrp);
+    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = ft_computeNPD(freq,cfg.fsample,2 ,segOrd,perm,permtype);
     coh.freq= Hz; coh.cohspctrm = nscohspctrm{1};
     nscoh(ncov) = max(nscohspctrm{1}(3,1,Hz>42 & Hz<62)); %-max(nscohspctrm(1,2,Hz>42 & Hz<62));
     npd(ncov) = max(npdspctrm{1,2}(3,1,Hz>42 & Hz<62)); %- max(npdspctrm{3}(2,1,Hz>42 & Hz<62));
     npdz(ncov) = max(npdspctrmZ{1,2}(3,1,Hz>42 & Hz<62)); %- max(npdspctrm{3}(2,1,Hz>42 & Hz<62));
     npdCi(ncov) = mean(npdspctrm{2,2}(3,1,:));
     
-    % NS Coh
-    plotNSCoherence(coh,cmapn(1,:),Nsig,plotfig,linestyle)
-    % NPD
-    %     plotNPD(Hz,npdspctrm,data,cmapn(3,:),1,linestyle)
-    %     plotNPD(Hz,npdspctrmW,data,cmapn(4,:),1,linestyle)
-    %
-    %% GRANGER
-    %     [Hz granger grangerft] = computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle,0);
-    %     npGCpw(ncov) = max(granger{1,2}(3,1,grangerft.freq>42 & grangerft.freq<62));
-    [Hz granger grangerft] = computeGranger(freq,cmapn(1,:),Nsig,plotfig,linestyle,1,bstrp);
+    %% Compute NPG
+    [Hz granger grangerft] = computeGranger(freq,1,perm,permtype)
     npGCmv(ncov) = max(granger{1,2}(3,1,grangerft.freq>42 & grangerft.freq<62));
     npGCci(ncov) = mean(granger{2,2}(3,1,:));
-    %     %% NPD CORR
-    %         figure(3)
-    %         plotNPDXCorr(lags,npdcrcv,data,cmapn(3,:),0,linestyle)
-    %         plotNPDXCorr(lags,npdcrcvW,data,cmapn(4,:),0,linestyle)
-    a =1;
 end
 % save('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F7_CItab','npdCi','npGCci')
 load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F7_CItab','npdCi','npGCci')
@@ -105,6 +98,3 @@ xlabel('X2 SNR');ylabel('FC X_1 \rightarrow X_3')
 legend({'NPD','Granger','NPDx2'},'Location','SouthEast')
 title('Effects of Incomplete Signals for Conditioning')
 
-% cfg = [];
-% cfg.viewmode = 'butterfly';  % you can also specify 'butterfly'
-% ft_databrowser(cfg, data);

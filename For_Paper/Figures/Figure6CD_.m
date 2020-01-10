@@ -1,29 +1,38 @@
-close all; clear
-addpath('C:\Users\Tim\Documents\Work\GIT\BrewerMap')
+% NPD_Validate_AddPaths()
+% addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\TWtools')
+close all
+
+%% This script will reproduce Figure 6C and D (-
+% Investigating the role of data availability upon the accuracy
+% of connectivity recovery when using non-parametric directionality
+% (NPD), and non-parametric Granger causality (NPG).
+
+% Plot Colors
 cmap = linspecer(4);
 
-%% Simulation 9B - Data Length with Fixed Number of Trials (n=50)
+% Setup random Graphs
 rng(42342)
 ncons = 4;
 nreps = 20; %25
 sz = 3;
 [CMat,NCV] = makeRndGraphs(ncons,nreps,sz);
 NCvec = linspace(3,12,12); %12
-% Nsamps = 150;
+DT = 35;
+fsamp= 200;
+Nsig = 3;
 
-% Simulate data
-
+%% Simulate data
 for dataLen = 1:size(NCvec,2)
     clear data
     rng(63487)
     for i = 1:ncons
         for n = 1:nreps
-%             Simulate Data
+            %             Simulate Data
             cfg             = [];
-            cfg.fsample     = 200;
+            cfg.fsample     = fsamp;
             cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
-            cfg.ntrials     = 50;
-            cfg.nsignal     = 3;
+            cfg.ntrials     = DT;
+            cfg.nsignal     = Nsig;
             cfg.method      = 'ar';
             cfg.params = CMat{i,n};
             cfg.noisecov = NCV;
@@ -35,27 +44,28 @@ for dataLen = 1:size(NCvec,2)
     save([cd '\benchmark\simdata_9B_' num2str(dataLen)],'data')
 end
 
-% Now test for recovery with dFC metrics
+%% Now test for recovery with dFC metrics
 for dataLen = 1:numel(NCvec)
     load([cd '\benchmark\simdata_9B_' num2str(dataLen)],'data')
-    bstrap = 1;
+    perm = 1; permtype = 2;
     for i = 1:ncons
-                 load([cd '\benchmark\9B_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
-       for n = 1:nreps
+        load([cd '\benchmark\9B_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
+        for n = 1:nreps
             TrueCMat = CMat{i,n};
             Z = sum(TrueCMat,3);
             Z(Z==0.5) = 0;
             Z(Z==0.3) = 1;
             
             dataN = data{i,n};
+            datalength =(2.^(NCvec(dataLen)))./fsamp;
             freq = computeSpectra(dataN,[0 0 0],3,0,'-',-1,dataN.cfg.triallength);
-            [Hz granger grangerft] = computeGranger(freq,cmap(2,:),3,1,'--',1,bstrap);
-            [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(dataN,1,(NCvec(dataLen)),1,bstrap);
-%             plotNPD(Hz,npdspctrm,dataN,cmap(3,:),1,':',0)
-            if bstrap== 1
+            [Hz granger grangerft] = computeGranger(freq,cmap(2,:),3,1,'--',1,perm);
+            [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = ft_computeNPD(freq,fsamp,1,NCvec(dataLen),perm,permtype);
+            
+            if perm== 1
                 NPG_ci{dataLen}= granger{2,2};
                 NPD_ci{dataLen} = npdspctrm{2,2};
-                bstrap = 0;
+                perm = 0;
                 save([cd '\benchmark\9B_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
             else
                 load([cd '\benchmark\9B_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
@@ -74,7 +84,7 @@ for dataLen = 1:numel(NCvec)
             Bc = B>crit;
             NPDScore(dataLen,i,n) = matrixScore(Bc,Z);
             disp([n i dataLen])
-
+            
         end
     end
 end

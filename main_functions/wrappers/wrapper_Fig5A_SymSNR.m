@@ -1,14 +1,12 @@
 function [] = wrapper_Fig5A_SymSNR(C,NCV,NC)
+% Sweep across symmetrical SNRs
 NCvec = logspace(log10(0.001),log10(1000),NC);
-% NCvec = linspace(0.001,10,NC);
 NCvec = sqrt(NCvec); % Convert to std
 
-for i = 1:NC
-    NCtits{i} = ['SigLeak = ' num2str(NCvec(i))];
-end
-rng(12312)
 cmap = linspecer(4);
-lsstyles = {'-','-.',':'};
+
+% Run the MVAR Simulation (fieldtrip implementation uses BSMART)
+rng(12312)
 Nsig = size(C,1);
 cfg             = [];
 cfg.ntrials     = 1;
@@ -19,22 +17,32 @@ cfg.method      = 'ar';
 cfg.params = C;
 cfg.noisecov = NCV;
 X              = ft_connectivitysimulation(cfg);
-
+segOrd = 8; % 2^n length of segment used for FFT
 
 for ncov = 1:NC
+        disp(ncov)
+
     if ncov == 1
-        bstrp = 0;
+%         perm = 1;
+%         permtype = 2;
+        % Can switch off if you have run once to save the results see
+        % L75-76
+        perm = 0;
+        permtype = 0;        
     else
-        bstrp = 0;
+        perm = 0;
+        permtype = 0;
     end
-    disp(ncov)
-    data = X;
-        plotfig =0;
+      
+    % Plotting parameters
     linestyle = '-';
     cmapn = cmap;
+    plotfig =0;
+    
+    %% Compute Symmetrical SNR
+    data = X;
     ncv = NCvec(ncov);
     
-    %% Compute SNR
     randproc = randn(size(data.trial{1}));
     for i = 1:size(randproc,1)
         s = data.trial{1}(i,:);
@@ -46,25 +54,22 @@ for ncov = 1:NC
         data.trial{1}(i,:) = y;
     end
     
-    %% Power
-    freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle);
-    pow = mean(abs(squeeze(freq.fourierspctrm(:,1,:))),1);
+    %% Compute Power with Fieldtrip (used for NPD and NPG computations)
+    datalength = (2^segOrd)./cfg.fsample;
+    freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle,1,datalength);
+    pow = mean(abs(squeeze(freq.fourierspctrm(:,1,:))),1); % Convert to power
     npPow(ncov) = max(pow(freq.freq>42 & freq.freq<62));
 
-    %% NPD
+    %% Compute NPD with Neurospec
     coh = [];
-    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1,8,1,bstrp);
+    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = ft_computeNPD(freq,cfg.fsample,1,segOrd,perm,permtype);
     coh.freq= Hz; coh.cohspctrm = nscohspctrm{1};
     nscoh(ncov) = max(nscohspctrm{1}(1,2,Hz>42 & Hz<62));
     npd(ncov) = max(npdspctrm{1,3}(1,2,Hz>42 & Hz<62));
     npdCi(ncov) = mean(npdspctrm{2,2}(1,2,:));
-    % NS Coh
-    plotNSCoherence(coh,cmapn(1,:),Nsig,plotfig,linestyle)
-    % NPD
-    plotNPD(Hz,npdspctrm,data,cmapn(3,:),plotfig,linestyle)
 
-    %% GRANGER
-    [Hz granger grangerft] = computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle,1,bstrp);
+    %% Compute NPG
+    [Hz granger grangerft] = computeGranger(freq,0,perm,permtype)
     npGC(ncov) = max(granger{1,3}(1,2,grangerft.freq>42 & grangerft.freq<62));
     npGCci(ncov) = mean(granger{2,3}(1,2,:));
 end

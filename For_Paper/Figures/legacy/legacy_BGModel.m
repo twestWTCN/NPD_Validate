@@ -1,7 +1,12 @@
-close all; clear all
-addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\TWtools')
-%% Simulation 6B- Model of BG
-fname = 'Figure6B';
+% NPD_Validate_AddPaths()
+% addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\TWtools')
+close all
+%% This script will reproduce Figure 6 - 
+% Investigating the role of data availability upon the accuracy of
+% connectivity recovery when using non-parametric directionality
+% (NPD), and non-parametric Granger causality (NPG). 
+
+% Setup the simulation
 N = 4; % # of nodes
 MO = 4;% model order
 C = repmat(repmat(0,N,N).*eye(N),1,1,MO);
@@ -10,7 +15,6 @@ C(1,1,1:4) = [0     0   0.20 -0.20];% "High Beta"
 C(2,2,1:4) = [0     0     0    0]; % "Low beta"
 C(3,3,1:4) = [0.6 -0.6    0    0];   % Null"
 C(4,4,1:4) = [0     0     0    0];   % Null"
-
 % C(3,3,1:3) = [-0.5 0.5 0.5];
 
 C(2,1,3) = 0.4;

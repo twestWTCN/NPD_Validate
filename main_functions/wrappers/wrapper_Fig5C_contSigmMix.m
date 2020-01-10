@@ -1,16 +1,13 @@
 function [] = wrapper_Fig5C_contSigmMix(C,NCV,NC)
-
+% Sweep across signal mixings
 NCvec = linspace(0,2,NC);
 nc_col_sc = [1 0.9 0.8];
-for i = 1:NC
-    NCtits{i} = ['SigLeak = ' num2str(NCvec(i))];
-end
-rng(2321)
 
 cmap = linspecer(4);
-lsstyles = {'-','-.',':'};
 cmapn = cmap.*nc_col_sc(1);
-% ncv = NCvec(ncov);
+
+% Run the MVAR Simulation (fieldtrip implementation uses BSMART)
+rng(5231)
 Nsig = size(C,1);
 cfg             = [];
 cfg.ntrials     = 1;
@@ -21,60 +18,54 @@ cfg.method      = 'ar';
 cfg.params = C;
 cfg.noisecov = NCV;
 X = ft_connectivitysimulation(cfg);
+segOrd = 8; % 2^n length of segment used for FFT
+
 for ncov = 1:NC
+    disp(ncov)
     if ncov == 1
-        bstrp = 0;
+%         perm = 1;
+%         permtype = 2;
+        % Can switch off if you have run once to save the results see
+        % L75-76
+        perm = 0;
+        permtype = 0; 
     else
-        bstrp = 0;
+        perm = 0;
+        permtype = 0;
     end
+    
+        % Plotting parameters
     linestyle = '--';
-    % Weighted mixture of signals
-    %     sigmix = [
-    %         0.7 0.1 0.1 0.1;
-    %         0.1 0.7 0.1 0.1;
-    %         0.1 0.1 0.7 0.1;
-    %         0.1 0.1 0.1 0.7;
-    %         ];
+    plotfig =0;
+
     %% Compute Signal Mixing
     data = X;
     sigmix = repmat(NCvec(ncov)/(Nsig-1),Nsig,Nsig).*~eye(Nsig);
     sigmix = sigmix+eye(Nsig).*1; %(1-NCvec(ncov));
     data.trial{1} = (data.trial{1} -mean(data.trial{1},2))./std(data.trial{1},[],2);
     data.trial{1} = sigmix*data.trial{1};
-%     shvar(:,:,ncov) = corr(data.trial{1}');
-    
     dumdata = randn(size(data.trial{1}));
     shvar(:,:,ncov) = corr((sigmix*dumdata)');
-    %     if ncov == NC
-    %         plotfig =1;
-    %     else
-    plotfig =0;
-    %     end
     
-    %% Power
-    freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle);
+    %% Compute Power with Fieldtrip (used for NPD and NPG computations)
+    datalength = (2^segOrd)./cfg.fsample;
+    freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle,1,datalength);
     pow = mean(abs(squeeze(freq.fourierspctrm(:,1,:))),1);
     npPow(ncov) = max(pow(freq.freq>42 & freq.freq<62));
     
-    %% NPD
-    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(data,1,8,1,bstrp);
+    %% Compute NPD with Neurospec
+    coh = [];
+    [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = ft_computeNPD(freq,cfg.fsample,1,segOrd,perm,permtype);
     coh.freq= Hz; coh.cohspctrm = nscohspctrm{1};
     nscoh(ncov) = max(nscohspctrm{1}(1,2,Hz>42 & Hz<62));
     npd(ncov) = max(npdspctrm{1,3}(1,2,Hz>42 & Hz<62));
     npdCi(ncov) = mean(npdspctrm{2,2}(1,2,:));
-    % NS Coh
-    %     plotNSCoherence(coh,cmapn(1,:),Nsig,plotfig,linestyle)
-    plotNPD_zero(Hz,npdspctrm,data,cmap(1,:),plotfig,linestyle)
-    % NPD
-    plotNPD(Hz,npdspctrm,data,cmapn(3,:),plotfig,linestyle)
-    % NPDx1
-    %     plotNPD(Hz,npdspctrmZ,data,cmapn(4,:),plotfig,linestyle)
-    %     plotNPD(Hz,npdspctrmW,data,cmap(4,:),plotfig,linestyle)
-    
-    %% GRANGER
-    [~, granger grangerft] = computeGranger(freq,cmapn(2,:),Nsig,plotfig,linestyle,1,bstrp);
+
+    %% Compute NPG
+    [Hz granger grangerft] = computeGranger(freq,0,perm,permtype)
     npGC(ncov) = max(granger{1,3}(1,2,grangerft.freq>42 & grangerft.freq<62));
-    npGCci(ncov) = mean(granger{2,2}(1,2,:));
+    npGCci(ncov) = mean(granger{2,3}(1,2,:));
+
 end
 % save('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5C_CItab','npdCi','npGCci')
 load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5C_CItab','npdCi','npGCci')

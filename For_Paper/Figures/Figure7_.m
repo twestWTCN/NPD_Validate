@@ -1,6 +1,12 @@
-close all; clear
-% addpath('C:\Users\Tim\Documents\Work\GIT\BrewerMap')
-cmap = linspecer(4);
+% NPD_Validate_AddPaths()
+% addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\TWtools')
+close all
+
+%% This script will reproduce Figure 7 - Investigating the role of combined
+% data confounds (instantaneous mixing and asymmetric signal-to-noise ratio;
+% SNR_XY) upon the accuracy of connectivity estimation when using
+% non-parametric directionality, and non-parametric multivariate Granger
+% causality.
 
 %% Simulation 10 - Combining ASNR and SigMix
 rng(946022)
@@ -26,7 +32,7 @@ SigMixvec = linspace(0,1,NC);
 
 for SNR = 1:size(SNRvec,2)
     for SMx = 1:size(SigMixvec,2)
-    clear dataBank data
+        clear dataBank data
         parfor n = 1:nreps
             % Simulate Data
             cfg             = [];
@@ -38,14 +44,14 @@ for SNR = 1:size(SNRvec,2)
             cfg.params = CMat{Ncon,n}; %selected Ncon connections here!
             cfg.noisecov = NCV;
             data_raw = ft_connectivitysimulation(cfg);
-
+            
             % Do the Signal Mixing
             data = data_raw;
             sigmix = repmat(SigMixvec(SMx)/(Nsig-1),Nsig,Nsig).*~eye(Nsig);
             sigmix = sigmix+eye(Nsig).*1; %(1-NCvec(ncov));
             data.trial{1} = (data.trial{1} -mean(data.trial{1},2))./std(data.trial{1},[],2);
             data.trial{1} = sigmix*data.trial{1};
-
+            
             % NowDo the ASNR
             randproc = randn(size(data.trial{1}));
             for i = 1:size(randproc,1)
@@ -63,39 +69,43 @@ for SNR = 1:size(SNRvec,2)
             %              dataBank{SNR,SMx,n} = data;
             disp([SNR SMx n])
         end
-    mkdir([cd '\benchmark'])
-    save([cd '\benchmark\simdata_10_' sprintf('%.0f_%.0f_%.0f',[SNR,SMx,Ncon])],'dataBank')
+        mkdir([cd '\benchmark'])
+        save([cd '\benchmark\simdata_10_' sprintf('%.0f_%.0f_%.0f',[SNR,SMx,Ncon])],'dataBank')
     end
 end
 
 % Now test for recovery with dFC metrics
 % load([cd '\benchmark\10_NPG_CI_NPD_CI_' num2str(Ncon)],'NPG_ci','NPD_ci')
-
+segOrd = 8; % 2^n length of segment used for FFT
 for SNR = 1:size(SNRvec,2)
     for SMx = 1:size(SigMixvec,2)
-        bstrap = 0;
-%         load([cd '\benchmark\10_NPG_CI_NPD_CI_' num2str(Ncon)],'NPG_ci','NPD_ci')
+        perm = 1; permtype = 2;
         load([cd '\benchmark\simdata_10_' sprintf('%.0f_%.0f_%.0f',[SNR,SMx,Ncon])],'dataBank')
-        parfor n = 1:nreps
-            
+        %         parfor n = 1:nreps; % if the CI is precomputed
+        for n = 1:nreps
             TrueCMat = CMat{Ncon,n};
             Z = sum(TrueCMat,3);
             Z(Z==0.5) = 0;
             Z(Z~=0) = 1;
             dataN = dataBank{n};
             %             dataN = dataBank{SNR,SMx,n};
-            freq = computeSpectra(dataN,[0 0 0],3,0,'-',-1,(2^8)/dataN.fsample);
-            [Hz granger grangerft] = computeGranger(freq,cmap(2,:),3,0,'--',1,bstrap);
-            [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = computeNPD(dataN,1,8,1,bstrap);
-%             plotNPD(Hz,npdspctrm,dataN,cmap(3,:),1,':',1)
-            %             if bstrap == 1
-            %                 NPG_ci{SNR,SMx}= granger{2,2};
-            %                 NPD_ci{SNR,SMx} = npdspctrm{2,2};
-            %                 bstrap = 0;
-            %                 save([cd '\benchmark\10_NPG_CI_NPD_CI_' num2str(Ncon)],'NPG_ci','NPD_ci')
-            %             else
-            %                 load([cd '\benchmark\10_NPG_CI_NPD_CI_' num2str(Ncon)],'NPG_ci','NPD_ci')
-            %             end
+            
+            % Compute Spectra
+            datalength = (2^segOrd)./cfg.fsample;
+            freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle,-1,datalength);
+            
+            % Compute connectivity
+            [Hz granger grangerft] = computeGranger(freq,1,perm,permtype)
+            [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = ft_computeNPD(freq,fsamp,1,NCvec(dataLen),perm,permtype);
+            %             plotNPD(Hz,npdspctrm,dataN,cmap(3,:),1,':',1)
+            if perm == 1
+                NPG_ci{SNR,SMx}= granger{2,2};
+                NPD_ci{SNR,SMx} = npdspctrm{2,2};
+                bstrap = 0;
+                save([cd '\benchmark\10_NPG_CI_NPD_CI_' num2str(Ncon)],'NPG_ci','NPD_ci')
+            else
+                load([cd '\benchmark\10_NPG_CI_NPD_CI_' num2str(Ncon)],'NPG_ci','NPD_ci')
+            end
             %
             % Now estimate
             NPG = granger{1,2};
@@ -118,11 +128,11 @@ for SNR = 1:size(SNRvec,2)
             B = squeeze(sum((NPD_w>0.05),3));
             crit = ceil(size(NPD_w,3).*0.15);
             Bc_w = B>crit;
- 
-%             NPD_q = npdspctrmQ{1,3};
-%             B = squeeze(sum((NPD_q>0.05),3));
-%             crit = ceil(size(NPD_q,3).*0.15);
-%             Bc_q = B>crit;
+            
+            %             NPD_q = npdspctrmQ{1,3};
+            %             B = squeeze(sum((NPD_q>0.05),3));
+            %             crit = ceil(size(NPD_q,3).*0.15);
+            %             Bc_q = B>crit;
             
             NPDScore(SNR,SMx,n) = matrixScore(Bc,Z);
             

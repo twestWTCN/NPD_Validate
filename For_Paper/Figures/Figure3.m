@@ -1,8 +1,9 @@
 % NPD_Validate_AddPaths()
 close all
-%% This script will reproduce Figure 2 - 
-% Analysis of the effects of signal-to-noise ratio (SNR) upon estimators of
-% directed functional connectivity.
+%% This script will reproduce Figure 3 - 
+% Analysis of the effects of unequal signal-to-noise ratios,
+% measured as a difference of the SNRs between X and Y 
+%(??SNR?_XY) upon symmetrical directed functional connectivity (dFC).
 
 % Setup the Simulation
 N = 3; % # of nodes

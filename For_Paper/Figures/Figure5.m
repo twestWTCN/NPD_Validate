@@ -1,6 +1,12 @@
-close all; clear
-%% Simulation 5 (SNR and Asym SNR Sweep and Sig Mix Sweep)
-% Effects of Signal Mixing
+% NPD_Validate_AddPaths()
+close all
+%% This script will reproduce Figure 5 - 
+% Investigating the effects of signal-to-noise ratios (SNR),
+% SNR asymmetries, and instantaneous linear mixing upon functional
+% connectivity measures: coherence, non-parametric directionality
+% (NPD), and non-parametric Granger causality (NPG).
+
+% Setup the Simulation
 N = 2; % # of nodes
 MO = 3;% model order
 C = repmat(repmat(0.5,N,N).*eye(N),1,1,MO);
@@ -9,6 +15,7 @@ C(2,1,2) = 0.35;
 C(1,2,2) = 0.35;
 NCV     = eye(N).*0.3;
 
+% These are the main routines:
 % 5A - FC vs SNR
 figure(1)
 wrapper_Fig5A_SymSNR(C,NCV,25)
@@ -18,6 +25,7 @@ figure(2)
 wrapper_Fig5B_AsymSNR(C,NCV,25)
 
 % Figure 5C- Continuous sweep of sig mixing
+% Setup the simulation
 N = 3; % # of nodes
 MO = 3;% model order
 C = repmat(repmat(0.5,N,N).*eye(N),1,1,MO);

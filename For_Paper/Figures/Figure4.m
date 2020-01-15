@@ -4,6 +4,7 @@ close all; clear;
 %% This script will reproduce Figure 4 -
 % Analysis of the effects of instantaneous mixing upon
 % estimates of directed functional connectivity (dFC). 
+permrun = 2; % (1) FFT Shuffle; (2) Phase Randomize
 
 % Setup the Simulation
 N = 3; % # of nodes
@@ -15,7 +16,7 @@ C(3,1,3) = 0.5;
 NCV     = eye(N).*0.3;
 
 % This is the main routine:
-wrapper_Fig4_SigMix(C,NCV,3)
+wrapper_Fig4_SigMix(C,NCV,3,permrun)
 
 % Now Configure plots:
 figure(3)
@@ -23,9 +24,9 @@ set(gcf,'Position',[1077         347         867         734])
 legend('\lambda = 0','\lambda = 0.3','\lambda = 0.6')
 
 figure(2)
-subplot(N,N,1); ylim([0 0.2])
-subplot(N,N,5); ylim([0 0.2])
-subplot(N,N,9); ylim([0 0.2])
+subplot(N,N,1); ylim([0 0.25])
+subplot(N,N,5); ylim([0 0.25])
+subplot(N,N,9); ylim([0 0.25])
 legend({'Power','Zero-NPD','NPD','Granger'})
 set(gcf,'Position',[1077         347         867         734])
 

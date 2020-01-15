@@ -1,7 +1,7 @@
 % NPD_Validate_AddPaths()
 % addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\TWtools')
 close all
-fresh = 1; % (1) Run permutation tests; (0) Load precomputed tables.
+fresh = 0; % (1) Run permutation tests; (0) Load precomputed tables.
 permrun = 1; % (1) FFT Shuffle; (2) Phase Randomize
 
 %% This script will reproduce Figure 7 - Investigating the role of combined
@@ -27,54 +27,55 @@ SNRvec(3,:) = repmat(0.001,1,NC);
 % SNRvec = sqrt(SNRvec);
 % SigMix
 SigMixvec = linspace(0,1,NC);
+
 % Nsamps = 150;
 
 % % Simulate data
-% % if fresh == 1
-% %     for SNR = 1:size(SNRvec,2)
-% %         for SMx = 1:size(SigMixvec,2)
-% %             clear dataBank data
-% %             parfor n = 1:nreps
-% %                 % Simulate Data
-% %                 cfg             = [];
-% %                 cfg.fsample     = 200;
-% %                 cfg.triallength = 100;
-% %                 cfg.ntrials     = 1;
-% %                 cfg.nsignal     = 3;
-% %                 cfg.method      = 'ar';
-% %                 cfg.params = CMat{Ncon,n}; %selected Ncon connections here!
-% %                 cfg.noisecov = NCV;
-% %                 data_raw = ft_connectivitysimulation(cfg);
-% %                 
-% %                 % Do the Signal Mixing
-% %                 data = data_raw;
-% %                 sigmix = repmat(SigMixvec(SMx)/(Nsig-1),Nsig,Nsig).*~eye(Nsig);
-% %                 sigmix = sigmix+eye(Nsig).*1; %(1-NCvec(ncov));
-% %                 data.trial{1} = (data.trial{1} -mean(data.trial{1},2))./std(data.trial{1},[],2);
-% %                 data.trial{1} = sigmix*data.trial{1};
-% %                 
-% %                 % NowDo the ASNR
-% %                 randproc = randn(size(data.trial{1}));
-% %                 for i = 1:size(randproc,1)
-% %                     s = data.trial{1}(i,:);
-% %                     s = (s-mean(s))./std(s);
-% %                     nr  =((SNRvec(i,SNR)*1).*randproc(i,:));
-% %                     y = s+nr;
-% %                     snr = var(s)/var(nr);
-% %                     disp(snr)
-% %                     %                 snrbank(SMx,n,i) = snr;
-% %                     %         y = (y-mean(y))./std(y);
-% %                     data.trial{1}(i,:) = y;
-% %                 end
-% %                 dataBank{n} = data;
-% %                 %              dataBank{SNR,SMx,n} = data;
-% %                 disp([SNR SMx n])
-% %             end
-% %             mkdir([cd '\benchmark'])
-% %             save([cd '\benchmark\simdata_10_' sprintf('%.0f_%.0f_%.0f',[SNR,SMx,Ncon])],'dataBank')
-% %         end
-% %     end
-% % end
+if fresh == 1
+    for SNR = 1:size(SNRvec,2)
+        for SMx = 1:size(SigMixvec,2)
+            clear dataBank data
+            parfor n = 1:nreps
+                % Simulate Data
+                cfg             = [];
+                cfg.fsample     = 200;
+                cfg.triallength = 100;
+                cfg.ntrials     = 1;
+                cfg.nsignal     = 3;
+                cfg.method      = 'ar';
+                cfg.params = CMat{Ncon,n}; %selected Ncon connections here!
+                cfg.noisecov = NCV;
+                data_raw = ft_connectivitysimulation(cfg);
+                
+                % Do the Signal Mixing
+                data = data_raw;
+                sigmix = repmat(SigMixvec(SMx)/(Nsig-1),Nsig,Nsig).*~eye(Nsig);
+                sigmix = sigmix+eye(Nsig).*1; %(1-NCvec(ncov));
+                data.trial{1} = (data.trial{1} -mean(data.trial{1},2))./std(data.trial{1},[],2);
+                data.trial{1} = sigmix*data.trial{1};
+                
+                % NowDo the ASNR
+                randproc = randn(size(data.trial{1}));
+                for i = 1:size(randproc,1)
+                    s = data.trial{1}(i,:);
+                    s = (s-mean(s))./std(s);
+                    nr  =((SNRvec(i,SNR)*1).*randproc(i,:));
+                    y = s+nr;
+                    snr = var(s)/var(nr);
+                    disp(snr)
+                    %                 snrbank(SMx,n,i) = snr;
+                    %         y = (y-mean(y))./std(y);
+                    data.trial{1}(i,:) = y;
+                end
+                dataBank{n} = data;
+                %              dataBank{SNR,SMx,n} = data;
+                disp([SNR SMx n])
+            end
+            mkdir([cd '\benchmark'])
+            save([cd '\benchmark\simdata_10_' sprintf('%.0f_%.0f_%.0f',[SNR,SMx,Ncon])],'dataBank')
+        end
+    end
+end
 % Now test for recovery with dFC metrics
 % load([cd '\benchmark\10_NPG_CI_NPD_CI_' num2str(Ncon)],'NPG_ci','NPD_ci')
 segOrd = 8; % 2^n length of segment used for FFT
@@ -93,17 +94,15 @@ for SNR = 1:size(SNRvec,2)
             Z(Z==0.5) = 0;
             Z(Z~=0) = 1;
             dataN = dataBank{n};
-            plotfig = 0;
-            linestyle = '-';
             %             dataN = dataBank{SNR,SMx,n};
             
             % Compute Spectra
-            datalength = (2^segOrd)./dataN.fsample;
-            freq = computeSpectra(dataN,[0 0 0],Nsig,plotfig,linestyle,-1,datalength);
+            datalength = (2^segOrd)./cfg.fsample;
+            freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle,-1,datalength);
             
             % Compute connectivity
             [Hz granger grangerft] = computeGranger(freq,1,perm,permtype)
-            [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = ft_computeNPD(freq,dataN.fsample,1,segOrd,perm,permtype);
+            [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = ft_computeNPD(freq,fsamp,1,NCvec(dataLen),perm,permtype);
             %             plotNPD(Hz,npdspctrm,dataN,cmap(3,:),1,':',1)
             if perm == 1
                 NPG_ci{SNR,SMx}= granger{2,2};
@@ -148,12 +147,15 @@ for SNR = 1:size(SNRvec,2)
         end
     end
 end
-
 if fresh == 1
-    save([cd '\benchmark\10BenchMarks_' num2str(Ncon)],'NPGScore','NPDScore','SNRvec','SigMixvec')
+    % save(['C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5A_CItab_type' num2str(permrun)],'npdCi','npGCci')
+    save(['C:\Users\timot\Documents\GitHub\NPD_Validate\precomp_CI_table\F5C_CItab_type' num2str(permrun)],'npdCi','npGCci')
 elseif fresh == 0
-    load([cd '\benchmark\10BenchMarks_' num2str(Ncon)],'NPGScore','NPDScore','SNRvec','SigMixvec')
+    % load(['C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5A_CItab_type' num2str(permrun)],'npdCi','npGCci')
+    load(['C:\Users\timot\Documents\GitHub\NPD_Validate\precomp_CI_table\F5C_CItab_type' num2str(permrun)],'npdCi','npGCci')
 end
+save([cd '\benchmark\10BenchMarks_' num2str(Ncon)],'NPGScore','NPDScore','SNRvec','SigMixvec')
+load([cd '\benchmark\10BenchMarks_' num2str(Ncon)],'NPGScore','NPDScore','SNRvec','SigMixvec')
 
 subplot(1,2,1);
 [cma1,b1,cf] = contourf(log(SNRvec(1,:)),SigMixvec,mean(NPGScore,3),-25:10:35);

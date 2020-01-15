@@ -15,12 +15,12 @@ elseif strmatch(getenv('computername'),'DESKTOP-94CEG1L-2')
     
 end
 addpath([preFix_MLAD 'linspecer'])
-addpath('C:\spm12'); spm eeg; close all
+addpath(spmpath); spm eeg; close all
 addpath(spmpath); spm eeg; close all
 addpath([preFix_MLAD 'Neurospec\neurospec21'])
 addpath([preFix_MLAD 'Neurospec\PartialDirected'])
 addpath([preFix_MLAD 'TWtools'])
-addpath([preFix_MLAD 'linspecer'])
+addpath([preFix_MLAD 'CombVec'])
 addpath([preFix_Git 'NPD_Validate\For_Paper\Figures'])
 addpath(genpath([preFix_Git 'NPD_Validate\main_functions']))
 

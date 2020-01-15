@@ -14,7 +14,7 @@ cfg.method    = 'instantaneous_causality';
 igrangerft      = ft_connectivityanalysis(cfg, freq);
 
 if bstrap == 1
-    bsn = 10;
+    bsn = 1000;
     ispec = nan([size(igrangerft.instantspctrm) bsn]);
     spec = nan([size(grangerft.grangerspctrm) bsn]);
     

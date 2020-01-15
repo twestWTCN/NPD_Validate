@@ -1,4 +1,4 @@
-function [] = wrapper_Fig4_SigMix(C,NCV,NC)
+function [] = wrapper_Fig4_SigMix(C,NCV,NC,permrun)
 % Signal Mixings
 NCvec = [0 0.45 1.2];
 nc_col_sc = [1 0.9 0.8];
@@ -23,7 +23,7 @@ segOrd = 8; % 2^n length of segment used for FFT
 for ncov = 1:NC
     if ncov == 1
         perm = 1;
-        permtype = 2;
+        permtype = permrun;
     else
         perm = 0;
         permtype = 0;
@@ -33,7 +33,7 @@ for ncov = 1:NC
     linestyle = lsstyles{ncov};
     cmapn = cmap.*nc_col_sc(ncov);
     plotfig =1;
-
+    
     %% Compute Signal Mixing
     data = X;
     sigmix = repmat(NCvec(ncov)/(Nsig-1),Nsig,Nsig).*~eye(Nsig);
@@ -43,7 +43,7 @@ for ncov = 1:NC
     
     dumdata = randn(size(data.trial{1}));
     shvar(:,:,ncov) = corr((sigmix*dumdata)');
-
+    
     %% Plot Example Trace
     figure(1)
     plot(data.time{1},data.trial{1}+[0 2.5 5]');
@@ -55,7 +55,7 @@ for ncov = 1:NC
     figure(2)
     datalength = (2^segOrd)./cfg.fsample;
     freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle,-1,datalength);
-        
+    
     %% Compute and Plot NPD
     figure(2)
     [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = ft_computeNPD(freq,cfg.fsample,1,segOrd,perm,permtype);
@@ -67,7 +67,7 @@ for ncov = 1:NC
     figure(2)
     [Hz granger grangerft] = computeGranger(freq,0,perm,permtype)
     plotNPD(grangerft.freq,granger,freq,cmapn(2,:),1,linestyle,perm)
-   
+    
     %% NPD CORR
     figure(3)
     plotNPDXCorr(lags,npdcrcv,data,[0 0 0],0,linestyle)

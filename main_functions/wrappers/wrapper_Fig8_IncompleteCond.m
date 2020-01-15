@@ -1,10 +1,10 @@
-function [] = wrapper_Fig8_IncompleteCond(C,NCV,NC)
+function [] = wrapper_Fig8_IncompleteCond(C,NCV,NC,permrun,fresh)
 % Simulate and analyses different routing + partialized NPD
 
 % Sweep across SNRs of hidden node
 NCvec = logspace(log10(0.001),log10(2000),NC);
 NCvec = sqrt(NCvec); % convert to std
-
+NCbase = 1;
 
 nc_col_sc = [1 0.9 0.8];
 cmap = linspecer(4);
@@ -24,15 +24,17 @@ cfg.noisecov = NCV;
 X              = ft_connectivitysimulation(cfg);
 segOrd = 8; % 2^n length of segment used for FFT
 
-for ncov = 1:NC
-    
-    if ncov == 1
-%         perm = 1;
-%         permtype = 2;
-        % Can switch off if you have run once to save the results see
-        % L75-76
-        perm = 0;
-        permtype = 0;        
+for ncov = 1:NC  
+    if ncov == NCbase
+        if fresh == 1
+            perm = 1;
+            permtype = permrun;
+        elseif fresh == 0
+            % Can switch off if you have run once to save the results see
+            % L75-76
+            perm = 0;
+            permtype = 0;
+        end
     else
         perm = 0;
         permtype = 0;
@@ -76,9 +78,13 @@ for ncov = 1:NC
     npGCmv(ncov) = max(granger{1,2}(3,1,grangerft.freq>42 & grangerft.freq<62));
     npGCci(ncov) = mean(granger{2,2}(3,1,:));
 end
-% save('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F7_CItab','npdCi','npGCci')
-load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F7_CItab','npdCi','npGCci')
-
+if fresh == 1
+%  save('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F7_CItab','npdCi','npGCci')
+  save('C:\Users\timot\Documents\GitHub\NPD_Validate\precomp_CI_table\F7_CItab','npdCi','npGCci')
+else
+% load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F7_CItab','npdCi','npGCci')
+  load('C:\Users\timot\Documents\GitHub\NPD_Validate\precomp_CI_table\F7_CItab','npdCi','npGCci')
+end
 
 SNRDB = 10*log10(snrbank(:,2));
 A = SNRDB;

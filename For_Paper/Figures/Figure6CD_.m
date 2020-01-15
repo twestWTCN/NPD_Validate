@@ -1,6 +1,8 @@
 % NPD_Validate_AddPaths()
 % addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\TWtools')
 close all
+fresh = 1; % (1) Run permutation tests; (0) Load precomputed tables.
+permrun = 1; % (1) FFT Shuffle; (2) Phase Randomize
 
 %% This script will reproduce Figure 6C and D (-
 % Investigating the role of data availability upon the accuracy
@@ -22,32 +24,37 @@ fsamp= 200;
 Nsig = 3;
 
 %% Simulate data
-for dataLen = 1:size(NCvec,2)
-    clear data
-    rng(63487)
-    for i = 1:ncons
-        for n = 1:nreps
-            %             Simulate Data
-            cfg             = [];
-            cfg.fsample     = fsamp;
-            cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
-            cfg.ntrials     = DT;
-            cfg.nsignal     = Nsig;
-            cfg.method      = 'ar';
-            cfg.params = CMat{i,n};
-            cfg.noisecov = NCV;
-            data{i,n} = ft_connectivitysimulation(cfg);
-            disp([dataLen i n])
-        end
-    end
-    mkdir([cd '\benchmark'])
-    save([cd '\benchmark\simdata_9B_' num2str(dataLen)],'data')
-end
-
+% if fresh == 1
+%     for dataLen = 1:size(NCvec,2)
+%         clear data
+%         rng(63487)
+%         for i = 1:ncons
+%             for n = 1:nreps
+%                 %             Simulate Data
+%                 cfg             = [];
+%                 cfg.fsample     = fsamp;
+%                 cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
+%                 cfg.ntrials     = DT;
+%                 cfg.nsignal     = Nsig;
+%                 cfg.method      = 'ar';
+%                 cfg.params = CMat{i,n};
+%                 cfg.noisecov = NCV;
+%                 data{i,n} = ft_connectivitysimulation(cfg);
+%                 disp([dataLen i n])
+%             end
+%         end
+%         mkdir([cd '\benchmark'])
+%         save([cd '\benchmark\simdata_9B_' num2str(dataLen)],'data')
+%     end
+% end
 %% Now test for recovery with dFC metrics
 for dataLen = 1:numel(NCvec)
     load([cd '\benchmark\simdata_9B_' num2str(dataLen)],'data')
-    perm = 1; permtype = 2;
+        if fresh == 1
+        perm = 1; permtype = permrun;
+    else
+        perm = 0;
+    end
     for i = 1:ncons
         load([cd '\benchmark\9B_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
         for n = 1:nreps
@@ -58,8 +65,8 @@ for dataLen = 1:numel(NCvec)
             
             dataN = data{i,n};
             datalength =(2.^(NCvec(dataLen)))./fsamp;
-            freq = computeSpectra(dataN,[0 0 0],3,0,'-',-1,dataN.cfg.triallength);
-            [Hz granger grangerft] = computeGranger(freq,cmap(2,:),3,1,'--',1,perm);
+            freq = computeSpectra(dataN,[0 0 0],3,0,'-',-1,(2.^(NCvec(dataLen)))./cfg.fsample);
+            [Hz granger grangerft] = computeGranger(freq,0,perm,permtype)
             [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = ft_computeNPD(freq,fsamp,1,NCvec(dataLen),perm,permtype);
             
             if perm== 1

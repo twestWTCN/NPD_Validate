@@ -1,10 +1,11 @@
 % NPD_Validate_AddPaths()
 % addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\TWtools')
 close all
-
-%% This script will reproduce Figure 6A and B - 
-% Investigating the role of data availability upon the accuracy 
-% of connectivity recovery when using non-parametric directionality 
+fresh = 0; % (1) Run permutation tests; (0) Load precomputed tables.
+permrun = 1; % (1) FFT Shuffle; (2) Phase Randomize
+%% This script will reproduce Figure 6A and B -
+% Investigating the role of data availability upon the accuracy
+% of connectivity recovery when using non-parametric directionality
 % (NPD), and non-parametric Granger causality (NPG).
 
 % Plot Colors
@@ -20,32 +21,38 @@ DA = 100; % Total data availability (100s)
 fsamp= 200;
 Nsig = 3;
 %% Simulate data
-% for dataLen = 1:size(NCvec,2)
-%     clear data
-%     rng(63261)
-%     for i = 1:ncons
-%         parfor n = 1:nreps
-% %             Simulate Data
-%             cfg             = [];
-%             cfg.fsample     = fsamp;
-%             cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
-%             cfg.ntrials     = ceil(DA./cfg.triallength);
-%             cfg.nsignal     = Nsig;
-%             cfg.method      = 'ar';
-%             cfg.params = CMat{i,n};
-%             cfg.noisecov = NCV;
-%             data{i,n} = ft_connectivitysimulation(cfg);
-%             disp([dataLen i n])
+% if fresh == 1
+%     for dataLen = 1:size(NCvec,2)
+%         clear data
+%         rng(63261)
+%         for i = 1:ncons
+%             parfor n = 1:nreps
+%                 %             Simulate Data
+%                 cfg             = [];
+%                 cfg.fsample     = fsamp;
+%                 cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
+%                 cfg.ntrials     = ceil(DA./cfg.triallength);
+%                 cfg.nsignal     = Nsig;
+%                 cfg.method      = 'ar';
+%                 cfg.params = CMat{i,n};
+%                 cfg.noisecov = NCV;
+%                 data{i,n} = ft_connectivitysimulation(cfg);
+%                 disp([dataLen i n])
+%             end
 %         end
+%         mkdir([cd '\benchmark'])
+%         save([cd '\benchmark\simdata_9A_' num2str(dataLen)],'data')
 %     end
-%     mkdir([cd '\benchmark'])
-%     save([cd '\benchmark\simdata_9A_' num2str(dataLen)],'data')
 % end
 
 %% Now test for recovery with dFC metrics
-for dataLen = 1:size(NCvec,2)
+for dataLen = 3:size(NCvec,2)
     load([cd '\benchmark\simdata_9A_' num2str(dataLen)],'data')
-    perm = 1; permtype = 2;
+    if fresh == 1
+        perm = 1; permtype = permrun;
+    else
+        perm = 0;
+    end
     for i = 1:ncons
         for n = 1:nreps
             TrueCMat = CMat{i,n};
@@ -65,9 +72,9 @@ for dataLen = 1:size(NCvec,2)
                 NPG_ci{dataLen}= granger{2,2};
                 NPD_ci{dataLen} = npdspctrm{2,2};
                 perm = 0;
-                save([cd '\benchmark\9A_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
+                save([cd '\benchmark\9A_NPG_CI_NPD_CI_' num2str(permrun)],'NPG_ci','NPD_ci')
             else
-                load([cd '\benchmark\9A_NPG_CI_NPD_CI'],'NPG_ci','NPD_ci')
+                load([cd '\benchmark\9A_NPG_CI_NPD_CI_' num2str(permrun)],'NPG_ci','NPD_ci')
             end
             
             % Now estimate
@@ -88,9 +95,14 @@ for dataLen = 1:size(NCvec,2)
     end
 end
 % 2
-save([cd '\benchmark\9ABenchMarks'],'NPDScore','NPGScore','NCvec','DA')
+if fresh == 1
+    save([cd '\benchmark\9ABenchMarks_' num2str(permrun)],'NPDScore','NPGScore','NCvec','DA')
+elseif fresh == 0
+    load([cd '\benchmark\9ABenchMarks_' num2str(permrun)],'NPDScore','NPGScore','NCvec','DA')
+end
 
-load([cd '\benchmark\9ABenchMarks'],'NPDScore','NPGScore','NCvec','DA')
+
+
 subplot(1,2,2)
 a = plot(NCvec,mean(NPGScore,3));
 rcmap = brewermap(6,'Reds');

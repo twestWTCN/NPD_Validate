@@ -1,6 +1,7 @@
-function [] = wrapper_Fig5C_contSigmMix(C,NCV,NC)
+function [] = wrapper_Fig5C_contSigmMix(C,NCV,NC,permrun,fresh)
 % Sweep across signal mixings
 NCvec = linspace(0,2,NC);
+NCbase = 1; % base condition (for computiing CI)
 nc_col_sc = [1 0.9 0.8];
 
 cmap = linspecer(4);
@@ -22,13 +23,16 @@ segOrd = 8; % 2^n length of segment used for FFT
 
 for ncov = 1:NC
     disp(ncov)
-    if ncov == 1
-%         perm = 1;
-%         permtype = 2;
+    if ncov == NCbase
+        if fresh == 1
+        perm = 1;
+        permtype = permrun;
+        elseif fresh == 0
         % Can switch off if you have run once to save the results see
         % L75-76
         perm = 0;
-        permtype = 0; 
+        permtype = 0;    
+        end
     else
         perm = 0;
         permtype = 0;
@@ -67,8 +71,15 @@ for ncov = 1:NC
     npGCci(ncov) = mean(granger{2,3}(1,2,:));
 
 end
-% save('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5C_CItab','npdCi','npGCci')
-load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5C_CItab','npdCi','npGCci')
+
+if fresh == 1
+    % save(['C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5A_CItab_type' num2str(permrun)],'npdCi','npGCci')
+    save(['C:\Users\timot\Documents\GitHub\NPD_Validate\precomp_CI_table\F5C_CItab_type' num2str(permrun)],'npdCi','npGCci')
+elseif fresh == 0
+    % load(['C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5A_CItab_type' num2str(permrun)],'npdCi','npGCci')
+    load(['C:\Users\timot\Documents\GitHub\NPD_Validate\precomp_CI_table\F5C_CItab_type' num2str(permrun)],'npdCi','npGCci')
+end
+
 
 for i = 1:size(shvar,3)
     p = shvar(:,:,i).*abs(eye(3)-1);
@@ -80,27 +91,27 @@ figure(3)
 scatter(x,nscoh,50,cmapn(1,:),'Marker','+','LineWidth',3);
 hold on
 scatter(x,npd,40,cmapn(3,:),'filled')
-plot(x,repmat(npdCi(1),1,size(x,2)),'LineStyle','--','color',cmapn(3,:))
-plot(x,-repmat(npdCi(1),1,size(x,2)),'LineStyle','--','color',cmapn(3,:))
+plot(x,repmat(npdCi(NCbase),1,size(x,2)),'LineStyle','--','color',cmapn(3,:))
+plot(x,-repmat(npdCi(NCbase),1,size(x,2)),'LineStyle','--','color',cmapn(3,:))
 
 scatter(x,npGC,40,cmapn(2,:),'filled')
-plot(x,repmat(npGCci(1),1,size(x,2)),'LineStyle','--','color',cmapn(2,:))
-plot(x,-repmat(npGCci(1),1,size(x,2)),'LineStyle','--','color',cmapn(2,:))
+plot(x,repmat(npGCci(NCbase),1,size(x,2)),'LineStyle','--','color',cmapn(2,:))
+plot(x,-repmat(npGCci(NCbase),1,size(x,2)),'LineStyle','--','color',cmapn(2,:))
 
 grid on
 xlabel('Shared Variance (correlation)');ylabel('FC Magnitude')
 legend({'Coherence','NPD','Granger'})
 title('FC vs Mixing')
-% cfg = [];
-% cfg.viewmode = 'butterfly';  % you can also specify 'butterfly'
-% ft_databrowser(cfg, data);
-figure(4)
-% scatter(NCvec,npPow,40,cmapn(1,:),'filled')
-scatter(NCvec,nscoh,50,cmapn(1,:),'Marker','+','LineWidth',3);
-hold on
-scatter(NCvec,npd,40,cmapn(3,:),'filled')
-scatter(NCvec,npGC,40,cmapn(2,:),'filled')
-grid on
-xlabel('\lambda (mixing)');ylabel('FC Magnitude')
-legend({'Coherence','NPD','Granger'})
-title('FC vs Mixing')
+
+
+
+% figure(4)
+% % scatter(NCvec,npPow,40,cmapn(1,:),'filled')
+% scatter(NCvec,nscoh,50,cmapn(1,:),'Marker','+','LineWidth',3);
+% hold on
+% scatter(NCvec,npd,40,cmapn(3,:),'filled')
+% scatter(NCvec,npGC,40,cmapn(2,:),'filled')
+% grid on
+% xlabel('\lambda (mixing)');ylabel('FC Magnitude')
+% legend({'Coherence','NPD','Granger'})
+% title('FC vs Mixing')

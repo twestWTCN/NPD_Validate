@@ -24,8 +24,10 @@ dx = [dx; conj(flipud(dx(2:end-1,:)))];
 dy = [dy; conj(flipud(dy(2:end-1,:)))];
 dz = [dz; conj(flipud(dz(2:end-1,:)))];
 
-seg_size=fix(2^seg_pwr);              % Segment length, T
-
+seg_size=round(2^seg_pwr);              % Segment length, T
+if rem(seg_size,2)
+    seg_size = seg_size+1;
+end
 % Segment for FFT - rows: seg_size. Columns: seg_tot
 seg_tot= size(dx,2); % No of segments, L
 samp_tot=seg_tot*seg_size;       % Record length,  R=LT

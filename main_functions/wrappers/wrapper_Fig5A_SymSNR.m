@@ -1,8 +1,8 @@
-function [] = wrapper_Fig5A_SymSNR(C,NCV,NC)
+function [] = wrapper_Fig5A_SymSNR(C,NCV,NC,permrun,fresh)
 % Sweep across symmetrical SNRs
 NCvec = logspace(log10(0.001),log10(1000),NC);
 NCvec = sqrt(NCvec); % Convert to std
-
+[~,NCbase] = min(abs(1-NCvec)); % Find base condition
 cmap = linspecer(4);
 
 % Run the MVAR Simulation (fieldtrip implementation uses BSMART)
@@ -22,13 +22,16 @@ segOrd = 8; % 2^n length of segment used for FFT
 for ncov = 1:NC
         disp(ncov)
 
-    if ncov == 1
-%         perm = 1;
-%         permtype = 2;
-        % Can switch off if you have run once to save the results see
-        % L75-76
-        perm = 0;
-        permtype = 0;        
+    if ncov == NCbase
+        if fresh == 1
+            perm = 1;
+            permtype = permrun;
+        elseif fresh == 0
+            % Can switch off if you have run once to save the results see
+            % L75-76
+            perm = 0;
+            permtype = 0;
+        end
     else
         perm = 0;
         permtype = 0;
@@ -69,13 +72,18 @@ for ncov = 1:NC
     npdCi(ncov) = mean(npdspctrm{2,2}(1,2,:));
 
     %% Compute NPG
-    [Hz granger grangerft] = computeGranger(freq,0,perm,permtype)
+    [Hz granger grangerft] = computeGranger(freq,0,perm,permtype);
     npGC(ncov) = max(granger{1,3}(1,2,grangerft.freq>42 & grangerft.freq<62));
     npGCci(ncov) = mean(granger{2,3}(1,2,:));
 end
-% save('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5A_CItab','npdCi','npGCci')
-load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5A_CItab','npdCi','npGCci')
 
+if fresh == 1
+    % save(['C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5A_CItab_type' num2str(permrun)],'npdCi','npGCci')
+    save(['C:\Users\timot\Documents\GitHub\NPD_Validate\precomp_CI_table\F5A_CItab_type' num2str(permrun)],'npdCi','npGCci')
+elseif fresh == 0
+    % load(['C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5A_CItab_type' num2str(permrun)],'npdCi','npGCci')
+    load(['C:\Users\timot\Documents\GitHub\NPD_Validate\precomp_CI_table\F5A_CItab_type' num2str(permrun)],'npdCi','npGCci')
+end
 SNRDB = 10*log10(snrbank(:,1));
 
 A = SNRDB;
@@ -85,11 +93,11 @@ hold on
 % [param,stat]=sigm_fit(A,nscoh)
 % hold on
 pa(2) = scatter(A,npd,40,cmapn(3,:),'filled');
-plot(A,repmat(npdCi(1),1,size(A,1)),'LineStyle','--','color',cmapn(3,:))
+plot(A,repmat(npdCi(NCbase),1,size(A,1)),'LineStyle','--','color',cmapn(3,:))
 
 % [param,stat]=sigm_fit(A,npd)
 pa(3) = scatter(A,npGC,40,cmapn(2,:),'filled');
-plot(A,repmat(npGCci(1),1,size(A,1)),'LineStyle','--','color',cmapn(2,:))
+plot(A,repmat(npGCci(NCbase),1,size(A,1)),'LineStyle','--','color',cmapn(2,:))
 
 % [param,stat]=sigm_fit(A,npGC); %,[],[.0043 0.5884 0.689 -3.76])
 grid on

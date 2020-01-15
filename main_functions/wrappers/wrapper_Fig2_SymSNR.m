@@ -1,4 +1,4 @@
-function [] = wrapper_Fig2_SymSNR(C,NCV,NC)
+function [] = wrapper_Fig2_SymSNR(C,NCV,NC,permrun)
 
 NCvec = [0 0.75 3];
 NCvec = sqrt(NCvec); % rescale to yield variance
@@ -24,7 +24,7 @@ segOrd = 8; % 2^n length of segment used for FFT
 for ncov = 1:NC
     if ncov == 1
         perm = 1;
-        permtype = 2;
+        permtype = permrun;
     else
         perm = 0;
         permtype = 0;

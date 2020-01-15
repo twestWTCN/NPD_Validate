@@ -1,6 +1,8 @@
 % NPD_Validate_AddPaths()
 % addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\TWtools')
 close all
+fresh = 1; % (1) Run permutation tests; (0) Load precomputed tables.
+permrun = 2; % (1) FFT Shuffle; (2) Phase Randomize
 
 %% This script will reproduce Figure 8 - The effects of incomplete
 % signal observation upon estimation of directed functional connectivity:
@@ -20,7 +22,7 @@ C(3,2,3) = 0.3;
 NCV     = eye(N).*0.3;
 
 figure(1)
-wrapper_Fig8_IncompleteCond(C,NCV,25)
+wrapper_Fig8_IncompleteCond(C,NCV,25,permrun,fresh)
 ylim([0 0.5])
 set(gcf,'Position',[680   678   483   393])
 
@@ -33,7 +35,7 @@ C(3,1,3) = 0.3;
 C(2,3,3) = 0.3;
 
 figure(2)
-wrapper_Fig8_IncompleteCond(C,NCV,25)
+wrapper_Fig8_IncompleteCond(C,NCV,25,permrun,fresh)
 ylim([0 0.5])
 set(gcf,'Position',[680   678   483   393])
 
@@ -47,7 +49,7 @@ C(2,3,3) = 0.3;
 C(1,2,3) = 0.3;
 
 figure(3)
-wrapper_Fig8_IncompleteCond(C,NCV,25)
+wrapper_Fig8_IncompleteCond(C,NCV,25,permrun,fresh)
 ylim([0 0.5])
 set(gcf,'Position',[680   678   483   393])
 

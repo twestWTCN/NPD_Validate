@@ -1,4 +1,4 @@
-function [] = wrapper_Fig1_CommonInput(C,NCV,NC)
+function [] = wrapper_Fig1_CommonInput(C,NCV,NC,permrun)
 
 nc_col_sc = 1; % rescale colors for each
 
@@ -22,7 +22,7 @@ segOrd = 8; % 2^n length of segment used for FFT
 for ncov = 1:NC
     if ncov == 1
         perm = 1; % for first run- do permutation testing
-        permtype = 2; % Permtype I is FFT segment shuffling; Permtype II is phase randomization
+        permtype = permrun; % Permtype I is FFT segment shuffling; Permtype II is phase randomization
     else
         perm = 0;
         permtype = 0;
@@ -57,12 +57,12 @@ for ncov = 1:NC
     % Plot NPD
     plotNPD(Hz,npdspctrm,data,cmapn(3,:),plotfig,linestyle,perm)
     % Plot Partialized NPD
-    plotNPD(Hz,npdspctrmZ,data,cmapn(4,:),plotfig,linestyle,perm)
+    plotNPD(Hz,npdspctrmZ,data,cmapn(4,:),plotfig,linestyle,0)
     %     plotNPD(Hz,npdspctrmW,data,cmap(4,:),plotfig,linestyle)
     
     %% Compute and plot GRANGER
     figure(2)
-    computeGranger(freq,1,perm,permtype)
+    [Hz granger grangerft] = computeGranger(freq,1,perm,permtype)
     plotNPD(grangerft.freq,granger,freq,cmapn(2,:),1,linestyle,perm)
     %% NPD CORR
     %     figure(3)

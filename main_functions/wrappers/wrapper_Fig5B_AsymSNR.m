@@ -1,10 +1,11 @@
-function [] = wrapper_Fig5B_AsymSNR(C,NCV,NC)
+function [] = wrapper_Fig5B_AsymSNR(C,NCV,NC,permrun,fresh)
 % Sweep across asymmetrical SNRs
 NCvec = repmat(0.001,2,NC);
 NCvec(1,1:floor(NC/2)) = logspace(log10(1000),log10(0.01),floor(NC/2));
 NCvec(2,ceil(NC/2)+1:end) = logspace(log10(0.01),log10(1000),floor(NC/2));
 NCvec = sqrt(NCvec); % convert to std
 
+NCbase = ceil(NC/2);
 cmap = linspecer(4);
 
 % Run the MVAR Simulation (fieldtrip implementation uses BSMART)
@@ -23,13 +24,16 @@ segOrd = 8; % 2^n length of segment used for FFT
 
 for ncov = 1:NC
     disp(ncov)
-    if ncov == 1
-%         perm = 1;
-%         permtype = 2;
+    if ncov == NCbase
+        if fresh == 1
+        perm = 1;
+        permtype = permrun;
+        elseif fresh == 0
         % Can switch off if you have run once to save the results see
         % L75-76
         perm = 0;
-        permtype = 0; 
+        permtype = 0;    
+        end
     else
         perm = 0;
         permtype = 0;
@@ -74,8 +78,15 @@ for ncov = 1:NC
     npGC(ncov) = max(granger{1,2}(1,2,grangerft.freq>42 & grangerft.freq<62))-max(granger{1,2}(2,1,grangerft.freq>42 & grangerft.freq<62));
     npGCci(ncov) = mean(granger{2,2}(1,2,:));
 end
-% save('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5B_CItab','npdCi','npGCci')
-load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5B_CItab','npdCi','npGCci')
+
+if fresh == 1
+    % save(['C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5A_CItab_type' num2str(permrun)],'npdCi','npGCci')
+    save(['C:\Users\timot\Documents\GitHub\NPD_Validate\precomp_CI_table\F5B_CItab_type' num2str(permrun)],'npdCi','npGCci')
+elseif fresh == 0
+    % load(['C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5A_CItab_type' num2str(permrun)],'npdCi','npGCci')
+    load(['C:\Users\timot\Documents\GitHub\NPD_Validate\precomp_CI_table\F5B_CItab_type' num2str(permrun)],'npdCi','npGCci')
+end
+
 
 figure(2)
 % snrbank
@@ -87,12 +98,12 @@ scatter(A,nscoh,50,cmapn(1,:),'Marker','+','LineWidth',3);
 
 hold on
 scatter(A,npd,40,cmapn(3,:),'filled')
-plot(A,repmat(npdCi(1),1,size(A,1)),'LineStyle','--','color',cmapn(3,:))
-plot(A,-repmat(npdCi(1),1,size(A,1)),'LineStyle','--','color',cmapn(3,:))
+plot(A,repmat(npdCi(NCbase),1,size(A,1)),'LineStyle','--','color',cmapn(3,:))
+plot(A,-repmat(npdCi(NCbase),1,size(A,1)),'LineStyle','--','color',cmapn(3,:))
 
 scatter(A,npGC,40,cmapn(2,:),'filled')
-plot(A,repmat(npGCci(1),1,size(A,1)),'LineStyle','--','color',cmapn(2,:))
-plot(A,-repmat(npGCci(1),1,size(A,1)),'LineStyle','--','color',cmapn(2,:))
+plot(A,repmat(npGCci(NCbase),1,size(A,1)),'LineStyle','--','color',cmapn(2,:))
+plot(A,-repmat(npGCci(NCbase),1,size(A,1)),'LineStyle','--','color',cmapn(2,:))
 
 grid on
 xlabel('SAsym');ylabel('FC Difference')

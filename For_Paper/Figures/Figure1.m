@@ -2,7 +2,7 @@
 close all
 %% This script will reproduce Figure 1 - 
 % Three-node simulation of MVAR model to compare functional connectivity measures.
-
+permrun = 2; % (1) FFT Shuffle; (2) Phase Randomize
 % Setup the Simulation
 fname = 'Figure1';
 N = 3; % # of nodes
@@ -17,7 +17,7 @@ fstord = 2;
 sndord = [2 3];
 
 % This is the main routine:
-wrapper_Fig1_CommonInput(C,NCV,1)
+wrapper_Fig1_CommonInput(C,NCV,1,permrun)
 
 % Now Configure plots:
 figure(1)
@@ -25,9 +25,9 @@ set(gca, 'Color', 'None'); box off
 set(gcf,'Position',[704   678   536   321])
 
 figure(2)
-subplot(N,N,1); ylim([0 0.15])
-subplot(N,N,5); ylim([0 0.15])
-subplot(N,N,9); ylim([0 0.15])
+subplot(N,N,1); ylim([0 0.175])
+subplot(N,N,5); ylim([0 0.175])
+subplot(N,N,9); ylim([0 0.175])
 legend({'Power','Coherence','NPD','NPDx2','Granger'})
 set(gcf,'Position',[1077         347         800         700])
 

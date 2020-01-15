@@ -1,8 +1,8 @@
 function [Hz granger grangerft] = computeGranger(freq,mvflag,bstrp,bstraptype)
-if nargin<6
+if nargin<2
     mvflag = 0;
 end
-if nargin<7
+if nargin<3
     bstrp = 0;
 end
 null = nan(size(freq.freq));

@@ -1,4 +1,4 @@
-function [] = wrapper_Fig3_AsymSNR(C,NCV,NC)
+function [] = wrapper_Fig3_AsymSNR(C,NCV,NC,permrun)
 % Asymetric SNRs
 % Setup std for the channels:
 NCvec = [0.01  1      10
@@ -27,7 +27,7 @@ segOrd = 8; % 2^n length of segment used for FFT
 for ncov = 1:NC
     if ncov == 1
         perm = 1;
-        permtype = 2;
+        permtype = permrun;
     else
         perm = 0;
         permtype = 0;

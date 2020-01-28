@@ -55,6 +55,8 @@ for ncov = 1:NC
         y = s + n;
         snr = var(s)/var(n);
         snrbank(ncov,i) = snr;
+        snrbp = computeBandLimSNR(s,n,[45 55],data);
+        snrbpbank(ncov,i) = snrbp;               
         data.trial{1}(i,:) = y;
     end
    
@@ -86,7 +88,7 @@ else
   load('C:\Users\timot\Documents\GitHub\NPD_Validate\precomp_CI_table\F7_CItab','npdCi','npGCci')
 end
 
-SNRDB = 10*log10(snrbank(:,2));
+SNRDB = 10*log10(snrbpbank(:,2));
 A = SNRDB;
 
 % scatter(NCvec,npPow,40,cmapn(1,:),'filled')

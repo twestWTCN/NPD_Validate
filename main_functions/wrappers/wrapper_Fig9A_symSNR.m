@@ -43,6 +43,9 @@ for ncov = 1:NC
         y = s + n;
         snr = var(s)/var(n);
         snrbank(ncov,i) = snr;
+        snrbp = computeBandLimSNR(s,n,[14 31],data);
+        snrbpbank(ncov,i) = snrbp;        
+        
         data.trial{1}(i,:) = y;
     end
     
@@ -60,3 +63,8 @@ for ncov = 1:NC
     plotSTN_M2_data(gHz,granger,data,cmapn(2,:),1,linestyle,perm)
 end
 
+% snrbpbank =
+% 
+%        Inf       Inf
+%     0.0713    0.2096
+%     0.0183    0.0538

@@ -6,8 +6,8 @@ close all
 % connectivity measures: coherence, non-parametric directionality
 % (NPD), and non-parametric Granger causality (NPG).
 
-fresh = 1; % (1) Run permutation tests; (0) Load precomputed tables.
-permrun = 2; % (1) FFT Shuffle; (2) Phase Randomize
+fresh = 0; % (1) Run permutation tests; (0) Load precomputed tables.
+permrun = 1; % (1) FFT Shuffle; (2) Phase Randomize
 % Setup the Simulation
 N = 2; % # of nodes
 MO = 3;% model order
@@ -25,7 +25,7 @@ ylim([0 1])
 
 % 5B - FC vs SNR Asymmetry
 figure(2)
-wrapper_Fig5B_AsymSNR(C,NCV,25,permrun,1)
+wrapper_Fig5B_AsymSNR(C,NCV,25,permrun,0)
 
 % Figure 5C- Continuous sweep of sig mixing
 % Setup the simulation

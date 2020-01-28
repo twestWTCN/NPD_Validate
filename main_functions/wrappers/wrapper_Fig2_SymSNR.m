@@ -22,7 +22,7 @@ X              = ft_connectivitysimulation(cfg);
 segOrd = 8; % 2^n length of segment used for FFT
 
 for ncov = 1:NC
-    if ncov == 1
+    if ncov == 1 && permrun ~=0
         perm = 1;
         permtype = permrun;
     else
@@ -45,6 +45,8 @@ for ncov = 1:NC
         y = s + n;
         snr = var(s)/var(n);
         snrbank(ncov,i) = snr;
+        snrbp = computeBandLimSNR(s,n,[45 55],data);
+        snrbpbank(ncov,i) = snrbp;
         data.trial{1}(i,:) = y;
     end
     
@@ -76,5 +78,17 @@ for ncov = 1:NC
     figure(3)
     plotNPDXCorr(lags,npdcrcv,data,[0 0 0],plotfig,linestyle)
 end
-SNRDB = 10*log10(snrbank(:,1))
+SNRDB = 10*log10(snrbank(:,1));
+SNRBPDB = 10*log10(snrbpbank(:,1));
+
 a= 1;
+
+% SNRDB:
+%        Inf
+%     1.2280
+%    -4.7618
+
+% SNRBPDB:
+%        Inf
+%     5.0973
+%    -0.8948

@@ -10,7 +10,7 @@ rng(12312)
 Nsig = size(C,1);
 cfg             = [];
 cfg.ntrials     = 1;
-cfg.triallength = 250;
+cfg.triallength = 500;
 cfg.fsample     = 200;
 cfg.nsignal     = Nsig;
 cfg.method      = 'ar';
@@ -54,6 +54,8 @@ for ncov = 1:NC
         y = s + n;
         snr = var(s)/var(n);
         snrbank(ncov,i) = snr;
+        snrbp = computeBandLimSNR(s,n,[45 55],data);
+        snrbpbank(ncov,i) = snrbp;        
         data.trial{1}(i,:) = y;
     end
     
@@ -61,7 +63,8 @@ for ncov = 1:NC
     datalength = (2^segOrd)./cfg.fsample;
     freq = computeSpectra(data,[0 0 0],Nsig,plotfig,linestyle,1,datalength);
     pow = mean(abs(squeeze(freq.fourierspctrm(:,1,:))),1); % Convert to power
-    npPow(ncov) = max(pow(freq.freq>42 & freq.freq<62));
+    npPow(ncov) = sum(pow(freq.freq>42 & freq.freq<62)./numel(freq.freq>42 & freq.freq<62));
+    npPowBGrnd(ncov) = sum(pow(freq.freq<=42 | freq.freq>=62)./numel(freq.freq<=42 | freq.freq>=62));
 
     %% Compute NPD with Neurospec
     coh = [];
@@ -84,20 +87,20 @@ elseif fresh == 0
     % load(['C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5A_CItab_type' num2str(permrun)],'npdCi','npGCci')
     load(['C:\Users\timot\Documents\GitHub\NPD_Validate\precomp_CI_table\F5A_CItab_type' num2str(permrun)],'npdCi','npGCci')
 end
-SNRDB = 10*log10(snrbank(:,1));
-
+% SNRDB = 10*log10(snrbank(:,1));
+SNRDB = 10*log10(snrbpbank(:,1));
 A = SNRDB;
 % scatter(NCvec,npPow,40,cmapn(1,:),'filled')
 pa(1) = scatter(A,nscoh,50,cmapn(1,:),'Marker','+','LineWidth',3);;
 hold on
 % [param,stat]=sigm_fit(A,nscoh)
-% hold on
+hold on
 pa(2) = scatter(A,npd,40,cmapn(3,:),'filled');
-plot(A,repmat(npdCi(NCbase),1,size(A,1)),'LineStyle','--','color',cmapn(3,:))
+plot(A,repmat(npdCi(1),1,size(A,1)),'LineStyle','--','color',cmapn(3,:))
 
 % [param,stat]=sigm_fit(A,npd)
 pa(3) = scatter(A,npGC,40,cmapn(2,:),'filled');
-plot(A,repmat(npGCci(NCbase),1,size(A,1)),'LineStyle','--','color',cmapn(2,:))
+plot(A,repmat(npGCci(1),1,size(A,1)),'LineStyle','--','color',cmapn(2,:))
 
 % [param,stat]=sigm_fit(A,npGC); %,[],[.0043 0.5884 0.689 -3.76])
 grid on

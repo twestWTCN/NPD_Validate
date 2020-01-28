@@ -4,7 +4,7 @@ close all
 % Analysis of the effects of signal-to-noise ratio (SNR) upon estimators of
 % directed functional connectivity.
 
-permrun = 1; % (1) FFT Shuffle; (2) Phase Randomize
+permrun = 0; % (1) FFT Shuffle; (2) Phase Randomize
 % Setup the Simulation
 N = 3; % # of nodes
 MO = 3;% model order 

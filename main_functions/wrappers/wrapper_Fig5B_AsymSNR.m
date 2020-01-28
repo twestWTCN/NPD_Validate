@@ -55,6 +55,8 @@ for ncov = 1:NC
         snr = var(s)/var(n);
         disp(snr)
         snrbank(ncov,i) = snr;
+        snrbp = computeBandLimSNR(s,n,[45 55],data);
+        snrbpbank(ncov,i) = snrbp;
         %         y = (y-mean(y))./std(y);
         data.trial{1}(i,:) = y;
     end
@@ -91,19 +93,19 @@ end
 figure(2)
 % snrbank
 % scatter(NCvec,npPow,40,cmapn(1,:),'filled')
-SNRDB = 10*log10(snrbank(:,1));
-SNRBASE = 10*log10(snrbank(:,2));
-A = SNRDB-SNRBASE;
+SNRDB = 10*log10(snrbpbank(:,1));
+SNRBASE = 10*log10(snrbpbank(:,2));
+AB = SNRDB-SNRBASE;
 scatter(A,nscoh,50,cmapn(1,:),'Marker','+','LineWidth',3);
 
 hold on
 scatter(A,npd,40,cmapn(3,:),'filled')
-plot(A,repmat(npdCi(NCbase),1,size(A,1)),'LineStyle','--','color',cmapn(3,:))
-plot(A,-repmat(npdCi(NCbase),1,size(A,1)),'LineStyle','--','color',cmapn(3,:))
+plot(A,repmat(npdCi(NCbase)/2,1,size(A,1)),'LineStyle','--','color',cmapn(3,:))
+plot(A,-repmat(npdCi(NCbase)/2,1,size(A,1)),'LineStyle','--','color',cmapn(3,:))
 
 scatter(A,npGC,40,cmapn(2,:),'filled')
-plot(A,repmat(npGCci(NCbase),1,size(A,1)),'LineStyle','--','color',cmapn(2,:))
-plot(A,-repmat(npGCci(NCbase),1,size(A,1)),'LineStyle','--','color',cmapn(2,:))
+plot(A,repmat(npGCci(NCbase)/2,1,size(A,1)),'LineStyle','--','color',cmapn(2,:))
+plot(A,-repmat(npGCci(NCbase)/2,1,size(A,1)),'LineStyle','--','color',cmapn(2,:))
 
 grid on
 xlabel('SAsym');ylabel('FC Difference')

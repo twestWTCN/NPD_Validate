@@ -1,9 +1,9 @@
 function [] = wrapper_Fig3_AsymSNR(C,NCV,NC,permrun)
 % Asymetric SNRs
 % Setup std for the channels:
-NCvec = [0.01  1      10
-         0.01  0.01   0.01
-         0.01  0.01   0.01];
+NCvec = [0.2  1      10
+         0.2  0.2   0.2
+         0.1  0.1   0.1];
 NCvec = sqrt(NCvec); % convert to variance
 
 nc_col_sc = [1 0.9 0.8]; % rescale colors
@@ -48,6 +48,8 @@ for ncov = 1:NC
         y = s + n;
         snr = var(s)/var(n);
         snrbank(ncov,i) = snr;
+        snrbp = computeBandLimSNR(s,n,[45 55],data);
+        snrbpbank(ncov,i) = snrbp;        
         data.trial{1}(i,:) = y;
     end
     
@@ -78,8 +80,9 @@ for ncov = 1:NC
     plotDiffNPD(grangerft.freq,granger,freq,cmapn(2,:),1,linestyle,perm)
 end
  % Review the estimated SNRs
-SNRDB = 10*log10(snrbank(:,1));
-SNRBASE = 10*log10(snrbank(:,2));
+SNRDB = 10*log10(snrbpbank(:,1));
+SNRBASE = 10*log10(snrbpbank(:,2));
 SRAT = SNRDB-SNRBASE;
+
 
 a= 1;

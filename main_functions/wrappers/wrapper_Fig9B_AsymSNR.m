@@ -2,8 +2,8 @@ function [] = wrapper_Fig9B_AsymSNR(X,NC,permrun,fresh)
 % Simulates asymmetrical SNR changes in empirical data
 % SNRs
 % Setup aSNRs
-NCvec(1,:) = [0.01 1 10];
-NCvec(2,:) = repmat(0.01,1,NC);
+NCvec(2,:) = [0.01 1 10];
+NCvec(1,:) = repmat(0.01,1,NC);
 NCvec = sqrt(NCvec); % convert to std
 nc_col_sc = [1 0.9 0.8]; % color scaler
 NCbase = 1;
@@ -45,6 +45,8 @@ for ncov = 1:NC
         y = s+n;
         snr = var(s)/var(n);
         snrbank(ncov,i) = snr;
+        snrbp = computeBandLimSNR(s,n,[14 31],data);
+        snrbpbank(ncov,i) = snrbp;
         data.trial{1}(i,:) = y;
     end    
     
@@ -62,3 +64,9 @@ for ncov = 1:NC
     plotSTN_M2_data(Hz,npdspctrm,data,cmapn(3,:),1,linestyle,perm)
     plotSTN_M2_data(gHz,granger,data,cmapn(2,:),1,linestyle,perm)
 end
+
+SNRDB = 10*log10(snrbpbank(:,1));
+SNRBASE = 10*log10(snrbpbank(:,2));
+SRAT = SNRDB-SNRBASE;
+
+a = 1;

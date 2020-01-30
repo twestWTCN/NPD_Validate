@@ -4,7 +4,7 @@ close all
 % Analysis of the effects of unequal signal-to-noise ratios,
 % measured as a difference of the SNRs between X and Y 
 %(??SNR?_XY) upon symmetrical directed functional connectivity (dFC).
-permrun = 1; % (1) FFT Shuffle; (2) Phase Randomize
+permrun = 0; % (1) FFT Shuffle; (2) Phase Randomize
 % Setup the Simulation
 N = 3; % # of nodes
 MO = 3;% model order

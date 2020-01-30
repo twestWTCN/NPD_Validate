@@ -87,6 +87,7 @@ elseif fresh == 0
     % load(['C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F5A_CItab_type' num2str(permrun)],'npdCi','npGCci')
     load(['C:\Users\timot\Documents\GitHub\NPD_Validate\precomp_CI_table\F5A_CItab_type' num2str(permrun)],'npdCi','npGCci')
 end
+mp = median(1:NC); % Zero point for Sym SNR
 % SNRDB = 10*log10(snrbank(:,1));
 SNRDB = 10*log10(snrbpbank(:,1));
 A = SNRDB;
@@ -96,11 +97,11 @@ hold on
 % [param,stat]=sigm_fit(A,nscoh)
 hold on
 pa(2) = scatter(A,npd,40,cmapn(3,:),'filled');
-plot(A,repmat(npdCi(1),1,size(A,1)),'LineStyle','--','color',cmapn(3,:))
+plot(A,repmat(npdCi(mp),1,size(A,1)),'LineStyle','--','color',cmapn(3,:))
 
 % [param,stat]=sigm_fit(A,npd)
 pa(3) = scatter(A,npGC,40,cmapn(2,:),'filled');
-plot(A,repmat(npGCci(1),1,size(A,1)),'LineStyle','--','color',cmapn(2,:))
+plot(A,repmat(npGCci(mp),1,size(A,1)),'LineStyle','--','color',cmapn(2,:))
 
 % [param,stat]=sigm_fit(A,npGC); %,[],[.0043 0.5884 0.689 -3.76])
 grid on

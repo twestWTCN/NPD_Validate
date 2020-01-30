@@ -26,7 +26,7 @@ X              = ft_connectivitysimulation(cfg);
 segOrd = 8; % 2^n length of segment used for FFT
 for ncov = 1:NC
     if ncov == 1
-        perm = 1;
+        perm = 0; warning('Perm flag off!!')
         permtype = permrun;
     else
         perm = 0;

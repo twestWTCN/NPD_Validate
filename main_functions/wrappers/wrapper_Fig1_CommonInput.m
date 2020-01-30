@@ -68,7 +68,8 @@ for ncov = 1:NC
     %     figure(3)
     %     plotNPDXCorr(lags,npdcrcv,data,[0 0 0],plotfig,linestyle)
     
-    a =1;
 end
+    a =1;
+
 % save('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F1_CItab','npdCi','npGCci')
 % load('C:\Users\Tim\Documents\Work\GIT\NPD_Validate\precomp_CI_table\F1A_CItab','npdCi','npGCci')

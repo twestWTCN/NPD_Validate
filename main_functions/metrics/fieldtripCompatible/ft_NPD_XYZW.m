@@ -6,7 +6,7 @@ function [f13 t13 f13Z t13Z f13W t13W ci13 ci13Z ci13W] = ft_NPD_XYZW(dx,dy,dz,d
 [f13W,t13W,~]=ft_sp2_R2a_pc1_tw(dx',dy',dw',fsamp,npdord,0);
 
 % Permuation Testing
-if perm == 1
+if perm == 1 && permtype>0
     bsn = 1000; %200;
     disp('bsn is v low!')
     sf13 = nan([bsn,size(f13)]);

@@ -2,7 +2,7 @@
 close all
 %% This script will reproduce Figure 1 - 
 % Three-node simulation of MVAR model to compare functional connectivity measures.
-permrun = 2; % (1) FFT Shuffle; (2) Phase Randomize
+permrun = 0; % (1) FFT Shuffle; (2) Phase Randomize
 % Setup the Simulation
 fname = 'Figure1';
 N = 3; % # of nodes

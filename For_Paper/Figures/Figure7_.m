@@ -22,18 +22,19 @@ for permrun = 1:2 % (1) FFT Shuffle; (2) Phase Randomize
         rng(946022)
         ncons = 3;
         %         Ncon = Ncon;
-        nreps =12;
+        nreps =24;
         Nsig = 3;
         [CMat,NCV] = makeRndGraphs(ncons,nreps,Nsig);
         
         NC = 13; % Needs to be Odd in order to get a scale
         % ASNR
         SNRvec = repmat(0.001,Nsig,NC);
-        SNRvec(1,1:floor(NC/2)) = logspace(log10(1000),log10(0.01),floor(NC/2));
-        SNRvec(2,ceil(NC/2)+1:end) = logspace(log10(0.01),log10(1000),floor(NC/2));
+        SNRvec(1,:) = logspace(log10(1000),log10(0.01),NC);
+%         SNRvec(1,1:floor(NC/2)) = logspace(log10(1000),log10(0.01),floor(NC/2));
+%         SNRvec(2,ceil(NC/2)+1:end) = logspace(log10(0.01),log10(1000),floor(NC/2));
         SNRvec = sqrt(SNRvec);
         % SigMix
-        SigMixvec = linspace(0,1,10);
+        SigMixvec = linspace(0,1,13);
         % Nsamps = 150;
         
 %         Simulate data
@@ -195,7 +196,7 @@ for X = 1:2
         xlabel('ASNR'); ylabel('Mixing (% Shared Variance)')
         cmap = brewermap(21,'RdBu');
         colormap(cmap)
-%         xlim([-50 0])
+        xlim([-50 0])
         
         subplot(1,2,2);
         [cma2,b2,cf] = contourf(meandeltaDB,SigMixvec,mean(NPDScore,3)',-10:10:100);

@@ -15,7 +15,7 @@ for X = 1:2
     % Setup random Graphs
     rng(231284)
     ncons = 3;
-    nreps = 4;
+    nreps = 24;
     [CMat,NCV] = makeRndGraphs(ncons,nreps,3);
     NCvec = linspace(3,10,5); %linspace(3,12,11);
     DA = 200; % Total data availability (200s)
@@ -31,8 +31,8 @@ for X = 1:2
                         %             Simulate Data
                         cfg             = [];
                         cfg.fsample     = fsamp;
-                        cfg.triallength = DA;
-                        cfg.ntrials     = 1; %ceil(DA./cfg.triallength);
+                        cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
+                        cfg.ntrials     = floor(DA./cfg.triallength);
                         cfg.nsignal     = Nsig;
                         cfg.method      = 'ar';
                         cfg.params = CMat{i,n};
@@ -68,7 +68,7 @@ for X = 1:2
                 dataIN = dataN{n};
                 % Compute spectra
                 datalength =(2.^(NCvec(dataLen)))./fsamp;
-                freq = computeSpectra(dataIN,[0 0 0],Nsig,plotfig,'-',-1,datalength);
+                freq = computeSpectra(dataIN,[0 0 0],Nsig,plotfig,'-',-1,[]);
                 % Compute connectivity
                 [Hz granger grangerft] = computeGranger(freq,1,perm,permtype)
                 [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = ft_computeNPD(freq,fsamp,1,NCvec(dataLen),perm,permtype);

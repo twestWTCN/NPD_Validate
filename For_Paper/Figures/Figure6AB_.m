@@ -2,7 +2,7 @@
 % addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\TWtools')
 clear; close all
 for X = 1:2
-    fresh = 1; % (1) Run permutation tests; (0) Load precomputed tables.
+    fresh = 0; % (1) Run permutation tests; (0) Load precomputed tables.
     permrun = X; % (1) FFT Shuffle; (2) Phase Randomize
     %% This script will reproduce Figure 6A and B -
     % Investigating the role of data availability upon the accuracy
@@ -15,11 +15,11 @@ for X = 1:2
     % Setup random Graphs
     rng(231284)
     ncons = 3;
-    nreps = 48;
+    nreps = 24;
     [CMat,NCV] = makeRndGraphs(ncons,nreps,3);
-    NCvec = linspace(3,10,12); %linspace(3,12,11);
+    NCvec = linspace(3,10,5); %linspace(3,12,11);
     DA = 200; % Total data availability (200s)
-    fsamp= 200;
+    fsamp= 500;
     Nsig = 3;
     %% Simulate data
         if fresh == 1
@@ -32,7 +32,7 @@ for X = 1:2
                         cfg             = [];
                         cfg.fsample     = fsamp;
                         cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
-                        cfg.ntrials     = ceil(DA./cfg.triallength);
+                        cfg.ntrials     = floor(DA./cfg.triallength);
                         cfg.nsignal     = Nsig;
                         cfg.method      = 'ar';
                         cfg.params = CMat{i,n};
@@ -49,7 +49,7 @@ for X = 1:2
     
     %% Now test for recovery with dFC metrics
     for dataLen = 1:size(NCvec,2)
-        load([cd '\benchmark\simdata_9A_' num2str(dataLen)],'data')
+        load([cd '\benchmark\simdata_9A_' num2str(dataLen)],'data','CMat')
         
         if fresh == 1
             perm = 1; permtype = permrun;
@@ -60,7 +60,7 @@ for X = 1:2
         
         for i = 1:ncons
             dataN = data(i,:);
-            for n = 1:nreps
+            parfor n = 1:nreps
                 TrueCMat = CMat{i,n};
                 Z = sum(TrueCMat,3);
                 Z(Z==0.5) = 0; % These are the self connections
@@ -68,30 +68,32 @@ for X = 1:2
                 dataIN = dataN{n};
                 % Compute spectra
                 datalength =(2.^(NCvec(dataLen)))./fsamp;
-                freq = computeSpectra(dataIN,[0 0 0],Nsig,plotfig,'-',-1,datalength);
+                freq = computeSpectra(dataIN,[0 0 0],Nsig,plotfig,'-',-1,[]);
                 % Compute connectivity
                 [Hz granger grangerft] = computeGranger(freq,1,perm,permtype)
                 [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = ft_computeNPD(freq,fsamp,1,NCvec(dataLen),perm,permtype);
 %                                  plotNPD(Hz,npdspctrm,dataIN,cmap(3,:),1,'-',0)
 %                                  plotNPD(grangerft.freq,granger,freq,cmap(2,:),1,'-',0)
-                if perm == 1
-                    NPG_ci{dataLen}= granger{2,2};
-                    NPD_ci{dataLen} = npdspctrm{2,2};
-                    perm = 0;
-                    save([cd '\benchmark\9A_NPG_CI_NPD_CI_' num2str(permrun)],'NPG_ci','NPD_ci')
-                else
-                    load([cd '\benchmark\9A_NPG_CI_NPD_CI_' num2str(permrun)],'NPG_ci','NPD_ci')
-                end
+%                 if perm == 1
+%                     NPG_ci{dataLen}= granger{2,2};
+%                     NPD_ci{dataLen} = npdspctrm{2,2};
+%                     perm = 0;
+%                     save([cd '\benchmark\9A_NPG_CI_NPD_CI_' num2str(permrun)],'NPG_ci','NPD_ci')
+%                 else
+%                     load([cd '\benchmark\9A_NPG_CI_NPD_CI_' num2str(permrun)],'NPG_ci','NPD_ci')
+%                 end
                 
                 % Now estimate
                 NPG = granger{1,2};
-                A = squeeze(sum((NPG>NPG_ci{dataLen}),3));
+                CT = nanmean(NPG_ci{12}(:));
+                A = squeeze(sum((NPG>CT),3));
                 crit = ceil(size(NPG,3).*0.1);
                 Ac = A>crit;
                 NPGScore(dataLen,i,n) = matrixScore(Ac,Z);
                 
                 NPD = npdspctrm{1,2};
-                B = squeeze(sum((NPD>NPD_ci{dataLen}),3));
+                CT = mean(NPD_ci{12}(:));
+                B = squeeze(sum((NPD>CT),3));
                 crit = ceil(size(NPD,3).*0.1);
                 Bc = B>crit;
                 NPDScore(dataLen,i,n) = matrixScore(Bc,Z);
@@ -101,11 +103,11 @@ for X = 1:2
         end
     end
     % 2
-    save([cd '\benchmark\9ABenchMarks_' num2str(permrun)],'NPDScore','NPGScore','NCvec','DA')
+    save([cd '\benchmark\9ABenchMarksZ_' num2str(permrun)],'NPDScore','NPGScore','NCvec','DA')
 end
 
 for X = 1:2
-    load([cd '\benchmark\9ABenchMarks_' num2str(X)],'NPDScore','NPGScore','NCvec','DA')
+    load([cd '\benchmark\9ABenchMarksZ_' num2str(X)],'NPDScore','NPGScore','NCvec','DA')
     
     figure(X)
     subplot(1,2,2)
@@ -120,7 +122,7 @@ for X = 1:2
     end
 %     h1 = legend(a,{'1 Connection','2 Connections','3 Connections','4 Connections'},'Location','SouthWest');
     grid on
-    xlabel('Trial Length ')
+    xlabel('Trial Length ') 
     ylabel('Estimation Accuracy')
     title('Effects of Trial Length on Connection Recovery with mvNPG')
     ylim([-20 100])

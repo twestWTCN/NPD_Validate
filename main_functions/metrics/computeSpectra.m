@@ -10,9 +10,11 @@ if smord == -1
 else
     tname = 'dpss';
 end
-cfg = [];
-cfg.length  = dl;
-data = ft_redefinetrial(cfg,data);
+if ~isempty(dl)
+    cfg = [];
+    cfg.length  = dl;
+    data = ft_redefinetrial(cfg,data);
+end
 %% Compute Spectra
 cfg           = [];
 cfg.method    = 'mtmfft';
@@ -32,9 +34,9 @@ if plotfig
             if row==col
                 subplot(Nsig,Nsig,(row-1)*Nsig+col);
                 Pxy=  mean(abs(squeeze(freq.fourierspctrm(:,col,:))),1);
-%                 [xCalc yCalc b Rsq] = linregress(freq.freq',Pxy');
-%                 Pxy2 = Pxy-yCalc';
-%                 Pxy2 = Pxy+abs(min(Pxy2));
+                %                 [xCalc yCalc b Rsq] = linregress(freq.freq',Pxy');
+                %                 Pxy2 = Pxy-yCalc';
+                %                 Pxy2 = Pxy+abs(min(Pxy2));
                 plot(freq.freq,Pxy,'color',cmap,'LineWidth',2,'linestyle',linestyle)
                 hold on
             end

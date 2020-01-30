@@ -2,7 +2,7 @@
 % addpath('C:\Users\twest\Documents\Work\MATLAB ADDONS\TWtools')
 clear; close all
 for X = 1:2
-    fresh = 1; % (1) Run permutation tests; (0) Load precomputed tables.
+    fresh = 0; % (1) Run permutation tests; (0) Load precomputed tables.
     permrun = X; % (1) FFT Shuffle; (2) Phase Randomize
     
     %% This script will reproduce Figure 6C and D (-
@@ -25,32 +25,32 @@ for X = 1:2
     Nsig = 3;
     
     %% Simulate data
-    if fresh == 1
-        for dataLen = 1:size(NCvec,2)
-            clear data
-            rng(63487)
-            for i = 1:ncons
-                parfor n = 1:nreps
-                    %             Simulate Data
-                    cfg             = [];
-                    cfg.fsample     = fsamp;
-                    cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
-                    cfg.ntrials     = DT;
-                    cfg.nsignal     = Nsig;
-                    cfg.method      = 'ar';
-                    cfg.params = CMat{i,n};
-                    cfg.noisecov = NCV;
-                    data{i,n} = ft_connectivitysimulation(cfg);
-                    disp([dataLen i n])
-                end
-            end
-            mkdir([cd '\benchmark'])
-            save([cd '\benchmark\simdata_9B_' num2str(dataLen)],'data')
-        end
-    end
+%     if fresh == 1
+%         for dataLen = 1:size(NCvec,2)
+%             clear data
+%             rng(63487)
+%             for i = 1:ncons
+%                 parfor n = 1:nreps
+%                     %             Simulate Data
+%                     cfg             = [];
+%                     cfg.fsample     = fsamp;
+%                     cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
+%                     cfg.ntrials     = DT;
+%                     cfg.nsignal     = Nsig;
+%                     cfg.method      = 'ar';
+%                     cfg.params = CMat{i,n};
+%                     cfg.noisecov = NCV;
+%                     data{i,n} = ft_connectivitysimulation(cfg);
+%                     disp([dataLen i n])
+%                 end
+%             end
+%             mkdir([cd '\benchmark'])
+%             save([cd '\benchmark\simdata_9B_' num2str(dataLen)],'data','CMat')
+%         end
+%     end
     %% Now test for recovery with dFC metrics
     for dataLen = 1:numel(NCvec)
-        load([cd '\benchmark\simdata_9B_' num2str(dataLen)],'data')
+        load([cd '\benchmark\simdata_9B_' num2str(dataLen)],'data','CMat')
         
         if fresh == 1
             perm = 1; permtype = permrun;
@@ -61,39 +61,39 @@ for X = 1:2
         
         for i = 1:ncons
             dataN = data(i,:);
-            for n = 1:nreps
+            parfor n = 1:nreps
                 TrueCMat = CMat{i,n};
                 Z = sum(TrueCMat,3);
                 Z(Z==0.5) = 0;
                 Z = Z>0;
                 dataIN = dataN{n};
                 % Compute spectra
-                datalength =(2.^(NCvec(dataLen)))./fsamp;
-                freq = computeSpectra(dataIN,[0 0 0],3,0,'-',-1,datalength);
+%                 datalength =(2.^(NCvec(dataLen)))./fsamp;
+                freq = computeSpectra(dataIN,[0 0 0],3,0,'-',-1,[]);
                 [Hz granger grangerft] = computeGranger(freq,1,perm,permtype)
                 [Hz lags npdspctrm npdspctrmZ npdspctrmW nscohspctrm npdcrcv] = ft_computeNPD(freq,fsamp,1,NCvec(dataLen),perm,permtype);
 %                 figure
 %                 plotNPD(Hz,npdspctrm,dataIN,cmap(3,:),1,'-',1)
 %                 plotNPD(grangerft.freq,granger,dataIN,cmap(2,:),1,'-',1)
                 %
-                if perm== 1
-                    NPG_ci{dataLen}= granger{2,2};
-                    NPD_ci{dataLen} = npdspctrm{2,2};
-                    perm = 0;
-                    save([cd '\benchmark\9B_NPG_CI_NPD_CI_' num2str(permtype)],'NPG_ci','NPD_ci')
-                else
-                    load([cd '\benchmark\9B_NPG_CI_NPD_CI_' num2str(permtype)],'NPG_ci','NPD_ci')
-                end
+%                 if perm== 1
+%                     NPG_ci{dataLen}= granger{2,2};
+%                     NPD_ci{dataLen} = npdspctrm{2,2};
+%                     perm = 0;
+%                     save([cd '\benchmark\9B_NPG_CI_NPD_CI_' num2str(permtype)],'NPG_ci','NPD_ci')
+%                 else
+%                     load([cd '\benchmark\9B_NPG_CI_NPD_CI_' num2str(permtype)],'NPG_ci','NPD_ci')
+%                 end
                 
                 % Now estimate
                 NPG = granger{1,2};
-                A = squeeze(sum((NPG>NPG_ci{dataLen}),3));
+                A = squeeze(sum((NPG>NPG_ci{12}),3));
                 crit = ceil(size(NPG,3).*0.10);
                 Ac = A>crit;
                 NPGScore(dataLen,i,n) = matrixScore(Ac,Z);
                 
                 NPD = npdspctrm{1,2};
-                B = squeeze(sum((NPD>NPD_ci{dataLen}),3));
+                B = squeeze(sum((NPD>NPD_ci{12}),3));
                 crit = ceil(size(NPD,3).*0.10);
                 Bc = B>crit;
                 NPDScore(dataLen,i,n) = matrixScore(Bc,Z);
@@ -103,13 +103,13 @@ for X = 1:2
         end
     end
     
-    save([cd '\benchmark\9BBenchMarks_' num2str(permtype)],'NPDScore','NPGScore','NCvec')
+    save([cd '\benchmark\9BBenchMarksZ_' num2str(permtype)],'NPDScore','NPGScore','NCvec')
 end
 
 for permtype = 1:2
     
     
-    load([cd '\benchmark\9BBenchMarks_' num2str(permtype) '.mat'],'NPDScore','NPGScore','NCvec')
+    load([cd '\benchmark\9BBenchMarksZ_' num2str(permtype) '.mat'],'NPDScore','NPGScore','NCvec')
     
     figure(permtype)
     subplot(1,2,2)

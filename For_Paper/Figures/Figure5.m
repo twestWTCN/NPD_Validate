@@ -7,7 +7,7 @@ close all
 % (NPD), and non-parametric Granger causality (NPG).
 
 fresh = 0; % (1) Run permutation tests; (0) Load precomputed tables.
-permrun = 1; % (1) FFT Shuffle; (2) Phase Randomize
+permrun = 2; % (1) FFT Shuffle; (2) Phase Randomize
 % Setup the Simulation
 N = 2; % # of nodes
 MO = 3;% model order

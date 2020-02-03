@@ -19,7 +19,7 @@ for X = 1:2
     [CMat,NCV] = makeRndGraphs(ncons,nreps,3);
     NCvec = linspace(3,10,5); %linspace(3,12,11);
     DA = 200; % Total data availability (200s)
-    fsamp= 500;
+    fsamp= 200;
     Nsig = 3;
     %% Simulate data
         if fresh == 1

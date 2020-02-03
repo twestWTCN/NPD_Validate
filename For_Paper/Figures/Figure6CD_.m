@@ -16,42 +16,44 @@ for X = 1:2
     % Setup random Graphs
     rng(231284)
     ncons = 3;
-    nreps = 48; %25
+    nreps = 24; %25
     sz = 3;
     [CMat,NCV] = makeRndGraphs(ncons,nreps,sz);
-    NCvec = linspace(3,10,12); %linspace(3,12,11);
-    DT = 20;
+    NCvec = linspace(3,10,8); %linspace(3,12,11);
+    DT = 100;
     fsamp= 200;
     Nsig = 3;
     
     %% Simulate data
-%     if fresh == 1
-%         for dataLen = 1:size(NCvec,2)
-%             clear data
-%             rng(63487)
-%             for i = 1:ncons
-%                 parfor n = 1:nreps
-%                     %             Simulate Data
-%                     cfg             = [];
-%                     cfg.fsample     = fsamp;
-%                     cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
-%                     cfg.ntrials     = DT;
-%                     cfg.nsignal     = Nsig;
-%                     cfg.method      = 'ar';
-%                     cfg.params = CMat{i,n};
-%                     cfg.noisecov = NCV;
-%                     data{i,n} = ft_connectivitysimulation(cfg);
-%                     disp([dataLen i n])
-%                 end
-%             end
-%             mkdir([cd '\benchmark'])
-%             save([cd '\benchmark\simdata_9B_' num2str(dataLen)],'data','CMat')
-%         end
-%     end
+    if fresh == 1
+        for dataLen = 1:size(NCvec,2)
+            clear data
+            rng(63487)
+            for i = 1:ncons
+                parfor n = 1:nreps
+                    %             Simulate Data
+                    cfg             = [];
+                    cfg.fsample     = fsamp;
+                    cfg.triallength = (2.^(NCvec(dataLen)))./cfg.fsample;
+                    cfg.ntrials     = DT;
+                    cfg.nsignal     = Nsig;
+                    cfg.method      = 'ar';
+                    cfg.params = CMat{i,n};
+                    cfg.noisecov = NCV;
+                    data{i,n} = ft_connectivitysimulation(cfg);
+                    disp([dataLen i n])
+                end
+            end
+            mkdir([cd '\benchmark'])
+            save([cd '\benchmark\simdata_9B_' num2str(dataLen)],'data','CMat')
+        end
+    end
+    NPG_ci = {}; NPG_ci = {};
+
     %% Now test for recovery with dFC metrics
     for dataLen = 1:numel(NCvec)
         load([cd '\benchmark\simdata_9B_' num2str(dataLen)],'data','CMat')
-        
+            load([cd '\benchmark\9B_NPG_CI_NPD_CI_' num2str(permrun)],'NPG_ci','NPD_ci')
         if fresh == 1
             perm = 1; permtype = permrun;
         else
@@ -84,16 +86,18 @@ for X = 1:2
 %                 else
 %                     load([cd '\benchmark\9B_NPG_CI_NPD_CI_' num2str(permtype)],'NPG_ci','NPD_ci')
 %                 end
-                
+%                 
                 % Now estimate
                 NPG = granger{1,2};
-                A = squeeze(sum((NPG>NPG_ci{12}),3));
+                CT = nanmean(NPG_ci{dataLen}(:));
+                A = squeeze(sum((NPG>CT),3));
                 crit = ceil(size(NPG,3).*0.10);
                 Ac = A>crit;
                 NPGScore(dataLen,i,n) = matrixScore(Ac,Z);
                 
                 NPD = npdspctrm{1,2};
-                B = squeeze(sum((NPD>NPD_ci{12}),3));
+                CT = mean(NPD_ci{dataLen}(:));
+                B = squeeze(sum((NPD>CT),3));
                 crit = ceil(size(NPD,3).*0.10);
                 Bc = B>crit;
                 NPDScore(dataLen,i,n) = matrixScore(Bc,Z);
@@ -103,13 +107,13 @@ for X = 1:2
         end
     end
     
-    save([cd '\benchmark\9BBenchMarksZ_' num2str(permtype)],'NPDScore','NPGScore','NCvec')
+    save([cd '\benchmark\6CDBenchMarks_' num2str(permtype)],'NPDScore','NPGScore','NCvec')
 end
 
 for permtype = 1:2
     
     
-    load([cd '\benchmark\9BBenchMarksZ_' num2str(permtype) '.mat'],'NPDScore','NPGScore','NCvec')
+    load([cd '\benchmark\6CDBenchMarks_' num2str(permtype) '.mat'],'NPDScore','NPGScore','NCvec')
     
     figure(permtype)
     subplot(1,2,2)

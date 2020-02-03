@@ -135,7 +135,7 @@ dx = [dx; conj(flipud(dx(2:end-1,:)))];
 dy = [dy; conj(flipud(dy(2:end-1,:)))];
 
 
-seg_size=round(2^seg_pwr);              % Segment length, T
+seg_size=size(dx,1);              % Segment length, T
 if rem(seg_size,2)
     seg_size = seg_size+1;
 end

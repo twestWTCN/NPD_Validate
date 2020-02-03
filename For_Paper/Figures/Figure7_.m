@@ -10,7 +10,7 @@ clear; close all
 
 %% Simulation 10 - Combining ASNR and SigMix
 % for permrun = 1:2
-fresh = 1; % (1) Run permutation tests; (0) Load precomputed tables.
+fresh = 0; % (1) Run permutation tests; (0) Load precomputed tables.
 for permrun = 1:2 % (1) FFT Shuffle; (2) Phase Randomize
     
     % The length is fixed so use previously computed values
@@ -29,12 +29,12 @@ for permrun = 1:2 % (1) FFT Shuffle; (2) Phase Randomize
         NC = 13; % Needs to be Odd in order to get a scale
         % ASNR
         SNRvec = repmat(0.001,Nsig,NC);
-        SNRvec(1,:) = logspace(log10(1000),log10(0.01),NC);
-%         SNRvec(1,1:floor(NC/2)) = logspace(log10(1000),log10(0.01),floor(NC/2));
-%         SNRvec(2,ceil(NC/2)+1:end) = logspace(log10(0.01),log10(1000),floor(NC/2));
+%         SNRvec(1,:) = logspace(log10(1000),log10(100),NC);
+        SNRvec(1,1:floor(NC/2)) = logspace(log10(1000),log10(0.01),floor(NC/2));
+        SNRvec(2,ceil(NC/2)+1:end) = logspace(log10(0.01),log10(1000),floor(NC/2));
         SNRvec = sqrt(SNRvec);
         % SigMix
-        SigMixvec = linspace(0,1,13);
+        SigMixvec = linspace(0,1,10);
         % Nsamps = 150;
         
 %         Simulate data
@@ -187,28 +187,28 @@ for X = 1:2
         meandeltaDB = nanmean(squeeze(deltaDBScore(:,1,:)),2);
 %         meandeltaDB = mean(mean(deltaDBBank,3),2);
         subplot(1,2,1);
-        [cma1,b1,cf] = contourf(meandeltaDB,SigMixvec,mean(NPGScore,3)',-10:10:100);
+        [cma1,b1,cf] = contourf(meandeltaDB,SigMixvec,mean(NPGScore,3)',-20:10:100);
         clabel(cma1,b1)
         title('NPG');
         % caxis([-10 75])
-        caxis([-10 100])
+        caxis([-20 100])
         
         xlabel('ASNR'); ylabel('Mixing (% Shared Variance)')
         cmap = brewermap(21,'RdBu');
         colormap(cmap)
-        xlim([-50 0])
+        xlim([-45 0])
         
         subplot(1,2,2);
-        [cma2,b2,cf] = contourf(meandeltaDB,SigMixvec,mean(NPDScore,3)',-10:10:100);
+        [cma2,b2,cf] = contourf(meandeltaDB,SigMixvec,mean(NPDScore,3)',-20:10:100);
         clabel(cma2,b2)
         title('NPD');
-        caxis([-10 100])
+        caxis([-20 100])
         % caxis([-10 75])
         xlabel('ASNR'); ylabel('Mixing')
         colormap(cmap)
         colorbar
         set(gcf,'Position',[404         577        1109         419])
-%         xlim([-50 0])
+        xlim([-45 0])
     end
 end
 % Bc = [0 0 1;

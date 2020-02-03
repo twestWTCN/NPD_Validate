@@ -17,8 +17,8 @@ for X = 1:2
     ncons = 3;
     nreps = 24;
     [CMat,NCV] = makeRndGraphs(ncons,nreps,3);
-    NCvec = linspace(3,10,5); %linspace(3,12,11);
-    DA = 200; % Total data availability (200s)
+    NCvec = linspace(3,10,8); %linspace(3,12,11);
+    DA = 500; % Total data availability (200s)
     fsamp= 200;
     Nsig = 3;
     %% Simulate data
@@ -103,11 +103,11 @@ for X = 1:2
         end
     end
     % 2
-    save([cd '\benchmark\9ABenchMarksZ_' num2str(permrun)],'NPDScore','NPGScore','NCvec','DA')
+    save([cd '\benchmark\9ABenchMarks_' num2str(permrun)],'NPDScore','NPGScore','NCvec','DA')
 end
 
 for X = 1:2
-    load([cd '\benchmark\9ABenchMarksZ_' num2str(X)],'NPDScore','NPGScore','NCvec','DA')
+    load([cd '\benchmark\9ABenchMarks_' num2str(X)],'NPDScore','NPGScore','NCvec','DA')
     
     figure(X)
     subplot(1,2,2)
@@ -125,7 +125,7 @@ for X = 1:2
     xlabel('Trial Length ') 
     ylabel('Estimation Accuracy')
     title('Effects of Trial Length on Connection Recovery with mvNPG')
-    ylim([-20 100])
+    ylim([0 100])
     subplot(1,2,1)
     b = plot(NCvec,mean(NPDScore,3));
     bcmap = brewermap(6,'Blues');
@@ -142,5 +142,5 @@ for X = 1:2
     ylabel('Estimation Accuracy')
     title('Effects of Trial Length on Connection Recovery with NPD')
     set(gcf,'Position',[353         512         1120         446])
-    ylim([-20 100])
+    ylim([0 100])
 end

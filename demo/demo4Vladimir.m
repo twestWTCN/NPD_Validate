@@ -1,3 +1,5 @@
+NPD_Validate_AddPaths
+
 % You need to add the neurospec paths and fieldtrip %
 % Setup Connectivity Simulation
 N = 3; % # of nodes

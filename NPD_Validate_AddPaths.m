@@ -1,6 +1,5 @@
 function NPD_Validate_AddPaths()
 if strmatch(getenv('computername'),'FREE')
-    
     spmpath = 'C:\spm12';
     preFix_MLAD = 'C:\Users\twest\Documents\Work\MATLAB ADDONS\';
     preFix_Git = 'C:\Users\twest\Documents\Work\GitHub\';
@@ -12,11 +11,19 @@ elseif strmatch(getenv('computername'),'DESKTOP-94CEG1L-2')
     spmpath = 'C:\Users\timot\Documents\GitHub\spm12';
     preFix_MLAD = 'C:\Users\timot\Documents\Work\MATLAB ADDONS\';
     preFix_Git = 'C:\Users\timot\Documents\GitHub\';
-    
+elseif strmatch(getenv('computername'),'DESKTOP-1QJTIMO')
+    spmpath = 'C:\Users\Tim West\Documents\GitHub\spm12';
+    preFix_MLAD = 'C:\Users\Tim West\Documents\Work\MATLAB ADDONS\';
+    preFix_Git = 'C:\Users\Tim West\Documents\GitHub\';
+elseif strmatch(getenv('computername'),'DESKTOP-1QJTIMO')
+    spmpath = 'C:\Users\Tim West\Documents\GitHub\spm12';
+    preFix_MLAD = 'C:\Users\Tim West\Documents\Work\MATLAB ADDONS\';
+    preFix_Git = 'C:\Users\Tim West\Documents\GitHub\';    
 end
+
 addpath([preFix_MLAD 'linspecer'])
-addpath('C:\spm12'); spm eeg; close all
-addpath(spmpath); spm eeg; close all
+% addpath('C:\Users\Tim West\Documents\GitHub\spm12'); spm eeg; close all
+% addpath(spmpath); spm eeg; close all
 addpath([preFix_MLAD 'Neurospec\neurospec21'])
 addpath([preFix_MLAD 'Neurospec\PartialDirected'])
 addpath([preFix_MLAD 'TWtools'])
